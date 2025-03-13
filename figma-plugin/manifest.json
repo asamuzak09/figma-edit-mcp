@@ -1,0 +1,11 @@
+{
+  "name": "Cursor Figma Assistant",
+  "id": "cursor-figma-assistant",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "capabilities": ["textreview"],
+  "enablePrivatePluginApi": true,
+  "enableProposedApi": false,
+  "editorType": ["figma"]
+} 
