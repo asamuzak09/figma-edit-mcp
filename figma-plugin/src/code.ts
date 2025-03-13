@@ -1,155 +1,244 @@
 // MCPサーバーとの通信設定
 const MCP_SERVER_URL = 'http://localhost:3000';
-const POLLING_INTERVAL = 2000; // 2秒ごとにポーリング
+const POLLING_INTERVAL = 1000; // 1秒ごとにポーリング
+const DEBUG = true; // デバッグモード
+
+// デバッグ用関数
+function debug(...args: any[]) {
+  if (DEBUG) {
+    console.log('[FIGMA-PLUGIN]', ...args);
+    try {
+      figma.ui.postMessage({ 
+        type: 'debug', 
+        message: args.map(arg => 
+          typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+        ).join(' ') 
+      });
+    } catch (e) {
+      console.error('Error sending debug message to UI:', e);
+    }
+  }
+}
 
 // プラグインの初期化
 figma.showUI(__html__, { width: 300, height: 400 });
 
 // プラグインIDとファイルIDを取得
-const pluginId = figma.root.getPluginData('pluginId') || Math.random().toString(36).substring(2, 15);
-const fileId = figma.fileKey;
+const pluginId = figma.root.getPluginData('pluginId') || `plugin-${Date.now()}`;
+const fileId = figma.fileKey || `local-file-${Date.now()}`;
 
 // プラグインIDを保存
 figma.root.setPluginData('pluginId', pluginId);
 
-// MCPサーバーに登録
-async function registerWithMCPServer() {
-  try {
-    const response = await fetch(`${MCP_SERVER_URL}/plugin/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        pluginId,
-        fileId
-      })
-    });
-    
-    const data = await response.json();
-    if (data.success) {
-      figma.ui.postMessage({ type: 'registration-success', fileId });
-      console.log('Registered with MCP server');
-      startPolling();
-    } else {
-      figma.ui.postMessage({ type: 'registration-error', error: data.error });
-      console.error('Failed to register with MCP server:', data.error);
-    }
-  } catch (error) {
-    figma.ui.postMessage({ type: 'registration-error', error: String(error) });
-    console.error('Error registering with MCP server:', error);
-  }
-}
-
-// MCPサーバーからのメッセージをポーリング
+// ポーリング間隔の管理
 let pollingInterval: number | null = null;
 
+// ポーリングを開始する関数
 function startPolling() {
   if (pollingInterval) {
     clearInterval(pollingInterval);
   }
   
   pollingInterval = setInterval(async () => {
-    try {
-      const response = await fetch(`${MCP_SERVER_URL}/plugin/poll/${fileId}/${pluginId}`);
-      const data = await response.json();
-      
-      if (data.messages && data.messages.length > 0) {
-        for (const message of data.messages) {
-          handleMessage(message);
-        }
-      }
-    } catch (error) {
-      console.error('Error polling MCP server:', error);
-    }
+    await pollForMessages();
   }, POLLING_INTERVAL) as unknown as number;
 }
 
-// MCPサーバーからのメッセージを処理
-async function handleMessage(message: any) {
-  console.log('Received message from MCP server:', message);
-  figma.ui.postMessage({ type: 'mcp-message', message });
-  
-  if (message.type === 'update') {
-    await applyUpdates(message.updates);
+// MCPサーバーにプラグインを登録
+async function registerWithServer() {
+  try {
+    debug('Registering with MCP server...');
+    const response = await fetch(`${MCP_SERVER_URL}/plugin/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        pluginId,
+        fileId,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    debug('Registration successful:', data);
+    figma.ui.postMessage({ type: 'log', message: `Connected to MCP server with file ID: ${fileId}` });
+    
+    // 登録成功後、ポーリングを開始
+    startPolling();
+  } catch (error: unknown) {
+    console.error('Failed to register with MCP server:', error);
+    debug('Registration error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    figma.ui.postMessage({ type: 'error', message: `Failed to connect to MCP server: ${errorMessage}` });
   }
 }
 
-// 更新を適用
-async function applyUpdates(updates: any) {
+// MCPサーバーからメッセージをポーリング
+async function pollForMessages() {
   try {
-    // ここでFigmaファイルを更新する処理を実装
-    // 例: レイヤーの作成、スタイルの変更など
+    debug('Polling for messages...');
+    const response = await fetch(`${MCP_SERVER_URL}/plugin/poll/${fileId}/${pluginId}`);
     
-    // 例: 新しいフレームを作成
-    if (updates.createFrame) {
-      const frame = figma.createFrame();
-      frame.name = updates.createFrame.name || 'New Frame';
-      frame.resize(
-        updates.createFrame.width || 100,
-        updates.createFrame.height || 100
-      );
-      
-      if (updates.createFrame.fills) {
-        frame.fills = updates.createFrame.fills;
-      }
-      
-      figma.currentPage.appendChild(frame);
+    if (!response.ok) {
+      throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
     }
+
+    const data = await response.json();
+    debug('Poll response:', data);
     
-    // 例: テキストを作成
-    if (updates.createText) {
-      const text = figma.createText();
-      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
-      text.characters = updates.createText.content || 'New Text';
-      text.name = updates.createText.name || 'Text Layer';
+    if (data.messages && data.messages.length > 0) {
+      debug(`Received ${data.messages.length} messages`);
+      debug(`Messages content:`, JSON.stringify(data.messages, null, 2));
       
-      if (updates.createText.fontSize) {
-        text.fontSize = updates.createText.fontSize;
-      }
-      
-      if (updates.createText.fills) {
-        text.fills = updates.createText.fills;
-      }
-      
-      figma.currentPage.appendChild(text);
-    }
-    
-    // 例: 既存のノードを更新
-    if (updates.updateNode && updates.updateNode.id) {
-      const node = figma.getNodeById(updates.updateNode.id);
-      if (node) {
-        if (updates.updateNode.name) {
-          node.name = updates.updateNode.name;
+      // メッセージを処理
+      data.messages.forEach((message: any) => {
+        debug('Processing message:', message);
+        if (message.type === 'update') {
+          debug('Update message found, applying updates:', message.updates);
+          applyUpdates(message.updates);
+        } else {
+          debug('Unknown message type:', message.type);
         }
-        
-        // SceneNodeのみvisibleプロパティを持つ
-        if ('visible' in updates.updateNode && 'visible' in node) {
-          (node as SceneNode).visible = updates.updateNode.visible;
-        }
-        
-        // 他のプロパティも同様に更新
-      }
+      });
+    } else {
+      // No messages
     }
-    
-    figma.ui.postMessage({ type: 'update-success', updates });
-  } catch (error) {
-    console.error('Error applying updates:', error);
-    figma.ui.postMessage({ type: 'update-error', error: String(error) });
+  } catch (error: unknown) {
+    console.error('Failed to poll for messages:', error);
+    debug('Polling error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    figma.ui.postMessage({ type: 'error', message: `Failed to poll for messages: ${errorMessage}` });
   }
+}
+
+// Figmaデザインに更新を適用
+function applyUpdates(updates: any) {
+  debug('Applying updates:', updates);
+  try {
+    // フレーム作成
+    if (updates.createFrame) {
+      const { name, width, height, fills, x, y } = updates.createFrame;
+      const frame = figma.createFrame();
+      frame.name = name || 'New Frame';
+      frame.resize(width || 100, height || 100);
+      
+      // 位置の設定
+      if (x !== undefined) frame.x = x;
+      if (y !== undefined) frame.y = y;
+      
+      // 塗りつぶしの設定
+      if (fills && Array.isArray(fills)) {
+        try {
+          const solidFills = fills as SolidPaint[];
+          frame.fills = solidFills;
+        } catch (e) {
+          debug('Error setting fills:', e);
+        }
+      }
+      
+      // 現在のページに追加
+      figma.currentPage.appendChild(frame);
+      debug('Frame created:', { name: frame.name, id: frame.id });
+      
+      // ビューポートを新しいフレームに移動
+      figma.viewport.scrollAndZoomIntoView([frame]);
+    }
+    
+    // テキスト要素の作成
+    if (updates.createText) {
+      if (Array.isArray(updates.createText)) {
+        // 配列の場合は各要素を処理
+        debug('Processing array of text elements:', updates.createText.length);
+        updates.createText.forEach((textData: {
+          name?: string;
+          content?: string;
+          fontSize?: number;
+          fills?: SolidPaint[];
+          x?: number;
+          y?: number;
+          fontWeight?: string;
+        }, index: number) => {
+          createTextElement(textData, index);
+        });
+      } else {
+        // 単一のオブジェクトの場合
+        createTextElement(updates.createText);
+      }
+    }
+    
+    debug('Updates applied successfully');
+    figma.ui.postMessage({ type: 'log', message: 'デザインを更新しました' });
+    figma.notify('デザインを更新しました');
+  } catch (error: unknown) {
+    console.error('Failed to apply updates:', error);
+    debug('Update application error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    figma.ui.postMessage({ type: 'error', message: `Failed to apply updates: ${errorMessage}` });
+    figma.notify('デザイン更新中にエラーが発生しました', { error: true });
+  }
+}
+
+// テキスト要素を作成する関数
+function createTextElement(textData: {
+  name?: string;
+  content?: string;
+  fontSize?: number;
+  fills?: SolidPaint[];
+  x?: number;
+  y?: number;
+  fontWeight?: string;
+}, index?: number) {
+  const { name, content, fontSize, fills, x, y, fontWeight } = textData;
+  const text = figma.createText();
+  text.name = name || `New Text ${index !== undefined ? index + 1 : ''}`;
+  
+  // 位置の設定
+  if (x !== undefined) text.x = x;
+  if (y !== undefined) text.y = y;
+  
+  // フォントの読み込みを待機
+  const fontStyle = fontWeight === 'Bold' ? 'Bold' : 'Regular';
+  figma.loadFontAsync({ family: "Inter", style: fontStyle })
+    .then(() => {
+      text.characters = content || 'Hello World';
+      if (fontSize) text.fontSize = fontSize;
+      if (fontWeight === 'Bold') text.fontName = { family: "Inter", style: "Bold" };
+      
+      // 塗りつぶしの設定
+      if (fills && Array.isArray(fills)) {
+        try {
+          const solidFills = fills as SolidPaint[];
+          text.fills = solidFills;
+        } catch (e) {
+          debug('Error setting text fills:', e);
+        }
+      }
+      
+      // 現在のページに追加
+      figma.currentPage.appendChild(text);
+      debug('Text created:', { name: text.name, id: text.id, content: text.characters });
+    })
+    .catch(e => {
+      debug('Error loading font:', e);
+    });
 }
 
 // UIからのメッセージを処理
-figma.ui.onmessage = async (msg) => {
+figma.ui.onmessage = (msg) => {
   if (msg.type === 'register') {
-    await registerWithMCPServer();
+    registerWithServer();
   } else if (msg.type === 'cancel') {
     if (pollingInterval) {
       clearInterval(pollingInterval);
+      pollingInterval = null;
     }
     figma.closePlugin();
   }
 };
 
 // 初期化時に登録を実行
-registerWithMCPServer(); 
+registerWithServer(); 

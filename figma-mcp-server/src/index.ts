@@ -2,14 +2,11 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
-  ListResourcesRequestSchema,
-  ReadResourceRequestSchema,
   ListToolsRequestSchema,
   CallToolRequestSchema,
   ErrorCode,
   McpError
 } from "@modelcontextprotocol/sdk/types.js";
-import axios from 'axios';
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
@@ -33,6 +30,9 @@ app.use(express.json());
 // プラグインからの接続を管理
 let pluginConnections: Record<string, any> = {};
 
+// ファイルごとのメッセージキュー
+let messageQueues: Record<string, any[]> = {};
+
 // プラグインの接続状態を確認するエンドポイント
 app.post('/plugin/register', (req, res) => {
   const { pluginId, fileId } = req.body;
@@ -46,36 +46,28 @@ app.post('/plugin/register', (req, res) => {
     status: 'connected'
   };
   
+  // メッセージキューを初期化
+  if (!messageQueues[fileId]) {
+    messageQueues[fileId] = [];
+  }
+  
   console.error(`Plugin ${pluginId} registered for file ${fileId}`);
   res.json({ success: true });
-});
-
-// プラグインへのメッセージ送信エンドポイント
-app.post('/plugin/message', (req, res) => {
-  const { fileId, message } = req.body;
-  if (!fileId || !message) {
-    return res.status(400).json({ error: 'fileId and message are required' });
-  }
-  
-  const connection = pluginConnections[fileId];
-  if (!connection) {
-    return res.status(404).json({ error: `No plugin registered for file ${fileId}` });
-  }
-  
-  // ここでは単純に成功を返すが、実際にはプラグインからの応答を待つ必要がある
-  console.error(`Message sent to plugin for file ${fileId}: ${JSON.stringify(message)}`);
-  res.json({ success: true, message: 'Message sent to plugin' });
 });
 
 // プラグインからのポーリングエンドポイント
 app.get('/plugin/poll/:fileId/:pluginId', (req, res) => {
   const { fileId, pluginId } = req.params;
   
+  console.error(`Polling request received from plugin ${pluginId} for file ${fileId}`);
+  
   // 接続情報を更新
   if (pluginConnections[fileId]) {
     pluginConnections[fileId].lastSeen = new Date();
     pluginConnections[fileId].status = 'connected';
+    console.error(`Updated existing connection for file ${fileId}`);
   } else {
+    console.error(`Creating new connection for file ${fileId} with plugin ${pluginId}`);
     pluginConnections[fileId] = {
       pluginId,
       lastSeen: new Date(),
@@ -83,9 +75,24 @@ app.get('/plugin/poll/:fileId/:pluginId', (req, res) => {
     };
   }
   
-  // ここでキューからメッセージを取得して返す実装が必要
-  // 今回はダミーレスポンス
-  res.json({ messages: [] });
+  // キューからメッセージを取得して返す
+  const messages = messageQueues[fileId] || [];
+  console.error(`Queue status for file ${fileId}: ${messages.length} messages`);
+  
+  if (messages.length > 0) {
+    console.error(`Returning ${messages.length} messages to plugin for file ${fileId}:`, JSON.stringify(messages, null, 2));
+    
+    // メッセージを返した後、キューをクリア
+    messageQueues[fileId] = [];
+    console.error(`Queue cleared for file ${fileId}`);
+    
+    // 明示的にメッセージを返す
+    return res.json({ messages });
+  }
+  
+  // メッセージがない場合は空の配列を返す
+  console.error(`No messages for file ${fileId}, returning empty array`);
+  return res.json({ messages: [] });
 });
 
 // サーバーの起動
@@ -98,28 +105,98 @@ interface FigmaUpdateParams {
   updates: Record<string, any>;
 }
 
+// プラグインに更新を送信する関数
+async function sendUpdateToPlugin(fileId: string, updates: any): Promise<boolean> {
+  try {
+    console.error(`Sending update to plugin for file ${fileId}`);
+    console.error(`Updates content:`, JSON.stringify(updates, null, 2));
+    
+    // プラグインが接続されているか確認
+    const connection = pluginConnections[fileId];
+    if (!connection) {
+      console.error(`Error: No plugin connected for file ${fileId}`);
+      return false;
+    }
+    
+    console.error(`Connection found:`, connection);
+    
+    // メッセージをキューに追加
+    if (!messageQueues[fileId]) {
+      messageQueues[fileId] = [];
+    }
+    
+    const newMessage = {
+      id: Date.now(),
+      timestamp: new Date(),
+      type: 'update',
+      updates
+    };
+    
+    messageQueues[fileId].push(newMessage);
+    console.error(`Message added to queue for file ${fileId}`);
+    console.error(`Queue length: ${messageQueues[fileId].length}`);
+    console.error(`Queue content:`, JSON.stringify(messageQueues[fileId], null, 2));
+    
+    return true;
+  } catch (error) {
+    console.error('Error sending update to plugin:', error);
+    return false;
+  }
+}
+
+// 直接メッセージキューに追加する関数（MCPサーバーから呼び出し用）
+function addToMessageQueue(fileId: string, updates: any): boolean {
+  try {
+    console.error(`Attempting to add message to queue for file ${fileId}`);
+    
+    // プラグインが接続されているか確認
+    if (!pluginConnections[fileId]) {
+      // 接続がない場合でもキューを作成しておく（後でプラグインが接続する可能性がある）
+      console.error(`Warning: No plugin currently connected for file ${fileId}, but will queue message anyway`);
+      
+      // 接続情報を仮作成
+      pluginConnections[fileId] = {
+        pluginId: 'pending-connection',
+        lastSeen: new Date(),
+        status: 'pending'
+      };
+    } else {
+      console.error(`Found existing connection for file ${fileId}: ${JSON.stringify(pluginConnections[fileId])}`);
+    }
+    
+    // メッセージをキューに追加
+    if (!messageQueues[fileId]) {
+      messageQueues[fileId] = [];
+    }
+    
+    const newMessage = {
+      id: Date.now(),
+      timestamp: new Date(),
+      type: 'update',
+      updates
+    };
+    
+    messageQueues[fileId].push(newMessage);
+    console.error(`Message directly added to queue for file ${fileId}`);
+    console.error(`Queue length: ${messageQueues[fileId].length}`);
+    console.error(`Queue content: ${JSON.stringify(messageQueues[fileId], null, 2)}`);
+    
+    return true;
+  } catch (error) {
+    console.error('Error adding message to queue:', error);
+    return false;
+  }
+}
+
 class FigmaServer {
   private server: Server;
-  private accessToken: string;
-  private axiosInstance;
 
   constructor() {
-    this.accessToken = FIGMA_ACCESS_TOKEN!;
-    
-    // Figma API用のaxiosインスタンスを作成
-    this.axiosInstance = axios.create({
-      baseURL: 'https://api.figma.com/v1',
-      headers: {
-        'X-Figma-Token': this.accessToken
-      }
-    });
-    
     this.server = new Server({
       name: "figma-mcp-server",
       version: "0.1.0"
     }, {
       capabilities: {
-        resources: {},
         tools: {}
       }
     });
@@ -140,17 +217,7 @@ class FigmaServer {
   }
 
   private setupHandlers(): void {
-    this.setupResourceHandlers();
     this.setupToolHandlers();
-  }
-
-  private setupResourceHandlers(): void {
-    this.server.setRequestHandler(
-      ListResourcesRequestSchema,
-      async () => ({
-        resources: []
-      })
-    );
   }
 
   private setupToolHandlers(): void {
@@ -191,42 +258,25 @@ class FigmaServer {
         const params = request.params.arguments as unknown as FigmaUpdateParams;
         try {
           const { fileId, updates } = params;
-          console.error(`Sending updates to plugin for file ${fileId}`);
+          console.error(`Received figma_update request for file ${fileId}`);
           
-          // プラグインが接続されているか確認
-          const connection = pluginConnections[fileId];
-          if (!connection) {
+          // 直接メッセージキューに追加（HTTPリクエストを使用しない）
+          const success = addToMessageQueue(fileId, updates);
+          
+          if (success) {
+            console.error(`Successfully added update to message queue for file ${fileId}`);
             return {
               content: [{
                 type: "text",
-                text: `Error: No plugin connected for file ${fileId}. Please open the file in Figma and run the plugin first.`
-              }],
-              isError: true
-            };
-          }
-          
-          // プラグインにメッセージを送信
-          try {
-            await axios.post(`http://localhost:${PORT}/plugin/message`, {
-              fileId,
-              message: {
-                type: 'update',
-                updates
-              }
-            });
-            
-            return {
-              content: [{
-                type: "text",
-                text: `Update request sent to Figma plugin for file ${fileId} with changes: ${JSON.stringify(updates)}`
+                text: `Update request sent to Figma plugin for file ${fileId}`
               }]
             };
-          } catch (error) {
-            console.error('Error sending message to plugin:', error);
+          } else {
+            console.error(`Failed to add update to message queue for file ${fileId}`);
             return {
               content: [{
                 type: "text",
-                text: `Error sending message to plugin: ${error instanceof Error ? error.message : String(error)}`
+                text: `Warning: Could not find connected plugin for file ${fileId}. Please open the file in Figma and run the plugin first.`
               }],
               isError: true
             };
@@ -252,5 +302,6 @@ class FigmaServer {
   }
 }
 
+// MCPサーバーの起動
 const mcpServer = new FigmaServer();
 mcpServer.run().catch(console.error); 

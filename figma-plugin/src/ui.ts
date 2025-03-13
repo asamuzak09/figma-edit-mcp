@@ -57,6 +57,10 @@ const html = `
       color: #18A957;
     }
     
+    .log-entry.debug {
+      color: #1E88E5;
+    }
+    
     button {
       background-color: #18A0FB;
       color: white;
@@ -145,6 +149,8 @@ const html = `
         addLogEntry('Applied updates: ' + JSON.stringify(message.updates), 'success');
       } else if (message.type === 'update-error') {
         addLogEntry('Error applying updates: ' + message.error, 'error');
+      } else if (message.type === 'debug') {
+        addLogEntry(message.message, 'debug');
       }
     };
   </script>
