@@ -99,37 +99,33 @@ function healthcheckWithServer() {
 function pollForMessages() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            debug('Polling for messages...');
             const response = yield fetch(`${MCP_SERVER_URL}/plugin/poll/${fileId}/${pluginId}`);
             if (!response.ok) {
-                throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+                debug(`Error polling for messages: ${response.status} ${response.statusText}`);
+                return;
             }
             const data = yield response.json();
-            debug('Poll response:', data);
-            if (data.messages && data.messages.length > 0) {
-                debug(`Received ${data.messages.length} messages`);
-                debug(`Messages content:`, JSON.stringify(data.messages, null, 2));
-                // メッセージを処理
+            if (data && data.messages && data.messages.length > 0) {
+                debug('Messages received:', data.messages);
+                // 各メッセージを処理
                 for (const message of data.messages) {
-                    debug('Processing message:', message);
                     if (message.type === 'update') {
-                        debug('Update message found, applying updates:', message.updates);
-                        yield applyUpdates(message.updates);
-                    }
-                    else {
-                        debug('Unknown message type:', message.type);
+                        // 更新メッセージを処理
+                        debug('Processing update message:', message);
+                        try {
+                            // 更新を適用
+                            yield applyUpdates(message.updates);
+                            debug('Updates applied successfully');
+                        }
+                        catch (error) {
+                            debug('Error applying updates:', error);
+                        }
                     }
                 }
             }
-            else {
-                // No messages
-            }
         }
         catch (error) {
-            console.error('Failed to poll for messages:', error);
-            debug('Polling error:', error);
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            figma.ui.postMessage({ type: 'error', message: `Failed to poll for messages: ${errorMessage}` });
+            debug('Error polling for messages:', error);
         }
     });
 }
@@ -138,158 +134,36 @@ function applyUpdates(updates) {
     return __awaiter(this, void 0, void 0, function* () {
         debug('Applying updates:', updates);
         try {
-            // フレーム作成
-            if (updates.createFrame) {
-                const { name, width, height, fills, x, y, cornerRadius, layoutMode, primaryAxisSizingMode, counterAxisSizingMode, paddingLeft, paddingRight, paddingTop, paddingBottom, itemSpacing, strokes, strokeWeight, strokeAlign, opacity, effects, visible } = updates.createFrame;
-                const frame = figma.createFrame();
-                frame.name = name || 'New Frame';
-                frame.resize(width || 100, height || 100);
-                // 位置の設定
-                if (x !== undefined)
-                    frame.x = x;
-                if (y !== undefined)
-                    frame.y = y;
-                // 塗りつぶしの設定
-                if (fills && Array.isArray(fills)) {
-                    try {
-                        frame.fills = fills;
-                    }
-                    catch (e) {
-                        debug('Error setting fills:', e);
-                    }
-                }
-                // 角丸の設定
-                if (cornerRadius !== undefined)
-                    frame.cornerRadius = cornerRadius;
-                // レイアウトモードの設定
-                if (layoutMode) {
-                    frame.layoutMode = layoutMode;
-                    if (primaryAxisSizingMode)
-                        frame.primaryAxisSizingMode = primaryAxisSizingMode;
-                    if (counterAxisSizingMode)
-                        frame.counterAxisSizingMode = counterAxisSizingMode;
-                    if (paddingLeft !== undefined)
-                        frame.paddingLeft = paddingLeft;
-                    if (paddingRight !== undefined)
-                        frame.paddingRight = paddingRight;
-                    if (paddingTop !== undefined)
-                        frame.paddingTop = paddingTop;
-                    if (paddingBottom !== undefined)
-                        frame.paddingBottom = paddingBottom;
-                    if (itemSpacing !== undefined)
-                        frame.itemSpacing = itemSpacing;
-                }
-                // ストロークの設定
-                if (strokes && Array.isArray(strokes)) {
-                    try {
-                        frame.strokes = strokes;
-                    }
-                    catch (e) {
-                        debug('Error setting strokes:', e);
-                    }
-                }
-                if (strokeWeight !== undefined)
-                    frame.strokeWeight = strokeWeight;
-                if (strokeAlign)
-                    frame.strokeAlign = strokeAlign;
-                // 透明度の設定
-                if (opacity !== undefined)
-                    frame.opacity = opacity;
-                // エフェクトの設定
-                if (effects && Array.isArray(effects)) {
-                    try {
-                        frame.effects = effects;
-                    }
-                    catch (e) {
-                        debug('Error setting effects:', e);
-                    }
-                }
-                // 表示/非表示の設定
-                if (visible !== undefined)
-                    frame.visible = visible;
-                // 現在のページに追加
-                figma.currentPage.appendChild(frame);
-                debug('Frame created:', { name: frame.name, id: frame.id });
-                // ビューポートを新しいフレームに移動
-                figma.viewport.scrollAndZoomIntoView([frame]);
-            }
-            // テキスト要素の作成
-            if (updates.createText) {
-                if (Array.isArray(updates.createText)) {
-                    // 配列の場合は各要素を処理
-                    debug('Processing array of text elements:', updates.createText.length);
-                    yield Promise.all(updates.createText.map((textData, index) => createTextElement(textData, index)));
-                }
-                else {
-                    // 単一のオブジェクトの場合
-                    yield createTextElement(updates.createText);
+            // 更新の処理
+            if (updates && updates.updates && Array.isArray(updates.updates)) {
+                // MCPサーバーから送られてくる形式（updates.updatesの形式）
+                debug('Processing updates.updates array:', updates.updates.length);
+                // 各更新を処理
+                for (const update of updates.updates) {
+                    const { type, data } = update;
+                    if (!type || !data)
+                        continue;
+                    // 一時的なupdatesオブジェクトを作成
+                    const tempUpdates = { [type]: data };
+                    yield processUpdates(tempUpdates);
                 }
             }
-            // 矩形の作成
-            if (updates.createRectangle) {
-                if (Array.isArray(updates.createRectangle)) {
-                    // 配列の場合は各要素を処理
-                    debug('Processing array of rectangles:', updates.createRectangle.length);
-                    yield Promise.all(updates.createRectangle.map((rectData, index) => createRectangleElement(rectData, index)));
-                }
-                else {
-                    // 単一のオブジェクトの場合
-                    yield createRectangleElement(updates.createRectangle);
-                }
-            }
-            // 楕円の作成
-            if (updates.createEllipse) {
-                if (Array.isArray(updates.createEllipse)) {
-                    // 配列の場合は各要素を処理
-                    debug('Processing array of ellipses:', updates.createEllipse.length);
-                    yield Promise.all(updates.createEllipse.map((ellipseData, index) => createEllipseElement(ellipseData, index)));
-                }
-                else {
-                    // 単一のオブジェクトの場合
-                    yield createEllipseElement(updates.createEllipse);
+            else if (Array.isArray(updates)) {
+                // 配列形式の場合（互換性のため）
+                debug('Processing updates array:', updates.length);
+                // 各更新を処理
+                for (const update of updates) {
+                    const { type, data } = update;
+                    if (!type || !data)
+                        continue;
+                    // 一時的なupdatesオブジェクトを作成
+                    const tempUpdates = { [type]: data };
+                    yield processUpdates(tempUpdates);
                 }
             }
-            // 線の作成
-            if (updates.createLine) {
-                if (Array.isArray(updates.createLine)) {
-                    // 配列の場合は各要素を処理
-                    debug('Processing array of lines:', updates.createLine.length);
-                    updates.createLine.forEach((lineData, index) => {
-                        createLineElement(lineData, index);
-                    });
-                }
-                else {
-                    // 単一のオブジェクトの場合
-                    createLineElement(updates.createLine);
-                }
-            }
-            // 画像の挿入
-            if (updates.createImage) {
-                if (Array.isArray(updates.createImage)) {
-                    // 配列の場合は各要素を処理
-                    debug('Processing array of images:', updates.createImage.length);
-                    updates.createImage.forEach((imageData, index) => {
-                        createImageElement(imageData, index);
-                    });
-                }
-                else {
-                    // 単一のオブジェクトの場合
-                    createImageElement(updates.createImage);
-                }
-            }
-            // コンポーネントの作成
-            if (updates.createComponent) {
-                if (Array.isArray(updates.createComponent)) {
-                    // 配列の場合は各要素を処理
-                    debug('Processing array of components:', updates.createComponent.length);
-                    updates.createComponent.forEach((componentData, index) => {
-                        createComponentElement(componentData, index);
-                    });
-                }
-                else {
-                    // 単一のオブジェクトの場合
-                    createComponentElement(updates.createComponent);
-                }
+            else {
+                // 旧形式の更新（互換性のため）
+                yield processUpdates(updates);
             }
             debug('Updates applied successfully');
             figma.ui.postMessage({ type: 'log', message: 'デザインを更新しました' });
@@ -304,10 +178,176 @@ function applyUpdates(updates) {
         }
     });
 }
+// 更新を処理する関数
+function processUpdates(updates) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // フレーム作成
+        if (updates.createFrame) {
+            const { name, width, height, fills, x, y, cornerRadius, layoutMode, primaryAxisSizingMode, counterAxisSizingMode, paddingLeft, paddingRight, paddingTop, paddingBottom, itemSpacing, strokes, strokeWeight, strokeAlign, opacity, effects, visible } = updates.createFrame;
+            const frame = figma.createFrame();
+            frame.name = name || 'New Frame';
+            frame.resize(width || 100, height || 100);
+            // 位置の設定
+            if (x !== undefined)
+                frame.x = x;
+            if (y !== undefined)
+                frame.y = y;
+            // 塗りつぶしの設定
+            if (fills && Array.isArray(fills)) {
+                try {
+                    frame.fills = fills;
+                }
+                catch (e) {
+                    debug('Error setting fills:', e);
+                }
+            }
+            // 角丸の設定
+            if (cornerRadius !== undefined)
+                frame.cornerRadius = cornerRadius;
+            // レイアウトモードの設定
+            if (layoutMode) {
+                frame.layoutMode = layoutMode;
+                if (primaryAxisSizingMode)
+                    frame.primaryAxisSizingMode = primaryAxisSizingMode;
+                if (counterAxisSizingMode)
+                    frame.counterAxisSizingMode = counterAxisSizingMode;
+                if (paddingLeft !== undefined)
+                    frame.paddingLeft = paddingLeft;
+                if (paddingRight !== undefined)
+                    frame.paddingRight = paddingRight;
+                if (paddingTop !== undefined)
+                    frame.paddingTop = paddingTop;
+                if (paddingBottom !== undefined)
+                    frame.paddingBottom = paddingBottom;
+                if (itemSpacing !== undefined)
+                    frame.itemSpacing = itemSpacing;
+            }
+            // ストロークの設定
+            if (strokes && Array.isArray(strokes)) {
+                try {
+                    frame.strokes = strokes;
+                }
+                catch (e) {
+                    debug('Error setting strokes:', e);
+                }
+            }
+            if (strokeWeight !== undefined)
+                frame.strokeWeight = strokeWeight;
+            if (strokeAlign)
+                frame.strokeAlign = strokeAlign;
+            // 透明度の設定
+            if (opacity !== undefined)
+                frame.opacity = opacity;
+            // エフェクトの設定
+            if (effects && Array.isArray(effects)) {
+                try {
+                    frame.effects = effects;
+                }
+                catch (e) {
+                    debug('Error setting effects:', e);
+                }
+            }
+            // 表示/非表示の設定
+            if (visible !== undefined)
+                frame.visible = visible;
+            // 現在のページに追加
+            figma.currentPage.appendChild(frame);
+            debug('Frame created:', { name: frame.name, id: frame.id });
+            // ビューポートを新しいフレームに移動
+            figma.viewport.scrollAndZoomIntoView([frame]);
+        }
+        // テキスト要素の作成
+        if (updates.createText) {
+            if (Array.isArray(updates.createText)) {
+                // 配列の場合は各要素を処理
+                debug('Processing array of text elements:', updates.createText.length);
+                yield Promise.all(updates.createText.map((textData, index) => createTextElement(textData, index)));
+            }
+            else {
+                // 単一のオブジェクトの場合
+                yield createTextElement(updates.createText);
+            }
+        }
+        // 矩形の作成
+        if (updates.createRectangle) {
+            if (Array.isArray(updates.createRectangle)) {
+                // 配列の場合は各要素を処理
+                debug('Processing array of rectangles:', updates.createRectangle.length);
+                yield Promise.all(updates.createRectangle.map((rectData, index) => createRectangleElement(rectData, index)));
+            }
+            else {
+                // 単一のオブジェクトの場合
+                yield createRectangleElement(updates.createRectangle);
+            }
+        }
+        // 楕円の作成
+        if (updates.createEllipse) {
+            if (Array.isArray(updates.createEllipse)) {
+                // 配列の場合は各要素を処理
+                debug('Processing array of ellipses:', updates.createEllipse.length);
+                yield Promise.all(updates.createEllipse.map((ellipseData, index) => createEllipseElement(ellipseData, index)));
+            }
+            else {
+                // 単一のオブジェクトの場合
+                yield createEllipseElement(updates.createEllipse);
+            }
+        }
+        // 線の作成
+        if (updates.createLine) {
+            if (Array.isArray(updates.createLine)) {
+                // 配列の場合は各要素を処理
+                debug('Processing array of lines:', updates.createLine.length);
+                updates.createLine.forEach((lineData, index) => {
+                    createLineElement(lineData, index);
+                });
+            }
+            else {
+                // 単一のオブジェクトの場合
+                createLineElement(updates.createLine);
+            }
+        }
+        // 画像の挿入
+        if (updates.createImage) {
+            if (Array.isArray(updates.createImage)) {
+                // 配列の場合は各要素を処理
+                debug('Processing array of images:', updates.createImage.length);
+                updates.createImage.forEach((imageData, index) => {
+                    createImageElement(imageData, index);
+                });
+            }
+            else {
+                // 単一のオブジェクトの場合
+                createImageElement(updates.createImage);
+            }
+        }
+        // コンポーネントの作成
+        if (updates.createComponent) {
+            if (Array.isArray(updates.createComponent)) {
+                // 配列の場合は各要素を処理
+                debug('Processing array of components:', updates.createComponent.length);
+                updates.createComponent.forEach((componentData, index) => {
+                    createComponentElement(componentData, index);
+                });
+            }
+            else {
+                // 単一のオブジェクトの場合
+                createComponentElement(updates.createComponent);
+            }
+        }
+    });
+}
 // テキスト要素を作成する関数
 function createTextElement(textData, index) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
         try {
+            // contentパラメータがない場合はエラーを返す
+            if (!textData.content) {
+                const error = new Error("Property 'content' is required for text elements");
+                debug('Error creating text element:', error);
+                figma.notify('テキスト要素の作成に失敗しました: contentパラメータが必要です', { error: true });
+                reject(error);
+                return;
+            }
             const { name, content, fontSize, fills, x, y, fontWeight } = textData;
             const text = figma.createText();
             text.name = name || `New Text ${index !== undefined ? index + 1 : ''}`;
@@ -323,7 +363,7 @@ function createTextElement(textData, index) {
                 debug('Loading font:', { family: "Inter", style: fontStyle });
                 yield figma.loadFontAsync({ family: "Inter", style: fontStyle });
                 // フォントが読み込まれた後にテキストを設定
-                text.characters = content || 'Hello World';
+                text.characters = content;
                 if (fontSize)
                     text.fontSize = fontSize;
                 if (fontWeight === 'Bold')

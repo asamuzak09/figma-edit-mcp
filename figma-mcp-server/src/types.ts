@@ -16,7 +16,22 @@ export interface Message {
 // Figma更新パラメータの型
 export interface FigmaUpdateParams {
   fileId: string;
-  updates: Record<string, any>;
+  updates: Array<{
+    type: string;
+    data: any;
+  }>;
+}
+
+// 更新の型
+export interface Update {
+  type: 'createFrame' | 'createText' | 'createRectangle' | 'createEllipse' | 'createLine' | 'createImage' | 'createComponent';
+  data: any;
+}
+
+// バッチ更新の型
+export interface BatchUpdate {
+  type: 'createFrame' | 'createText' | 'createRectangle' | 'createEllipse' | 'createLine' | 'createImage' | 'createComponent';
+  data: any;
 }
 
 // プラグイン接続リクエストの型

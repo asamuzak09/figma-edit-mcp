@@ -50,62 +50,49 @@ FIGMA_ACCESS_TOKEN=your_figma_access_token node build/index.js
 
 ### Cursor からデザイン更新
 
-Cursor のチャットで以下のようにツールを呼び出します：
+Cursor のチャットで MCP ツールを使用して Figma デザインを更新できます。以下はリクエストパラメータの例です：
 
-```
-/tool figma_update {
+```json
+{
   "fileId": "your_figma_file_id",
-  "updates": {
-    "createFrame": {
-      "name": "Generated Design",
-      "width": 400,
-      "height": 300,
-      "fills": [{ "type": "SOLID", "color": { "r": 0.9, "g": 0.9, "b": 0.9 } }]
-    },
-    "createText": {
-      "name": "Heading",
-      "content": "Hello from Cursor!",
-      "fontSize": 24,
-      "fills": [{ "type": "SOLID", "color": { "r": 0.1, "g": 0.1, "b": 0.1 } }]
-    }
-  }
-}
-```
-
-#### 複数のテキスト要素を一度に作成
-
-`createText`は配列形式にも対応しています：
-
-```
-/tool figma_update {
-  "fileId": "your_figma_file_id",
-  "updates": {
-    "createFrame": {
-      "name": "Multiple Texts Frame",
-      "width": 400,
-      "height": 300,
-      "fills": [{ "type": "SOLID", "color": { "r": 0.9, "g": 0.9, "b": 0.9 } }]
-    },
-    "createText": [
-      {
-        "name": "Heading",
-        "content": "Main Title",
-        "fontSize": 24,
-        "fontWeight": "Bold",
-        "fills": [{ "type": "SOLID", "color": { "r": 0.1, "g": 0.1, "b": 0.1 } }],
-        "x": 20,
-        "y": 20
-      },
-      {
-        "name": "Subtitle",
-        "content": "This is a subtitle",
-        "fontSize": 16,
-        "fills": [{ "type": "SOLID", "color": { "r": 0.3, "g": 0.3, "b": 0.3 } }],
-        "x": 20,
-        "y": 60
+  "updates": [
+    {
+      "type": "createFrame",
+      "data": {
+        "name": "新しいフレーム",
+        "width": 400,
+        "height": 300,
+        "fills": [
+          { "type": "SOLID", "color": { "r": 0.9, "g": 0.9, "b": 0.9 } }
+        ]
       }
-    ]
-  }
+    },
+    {
+      "type": "createText",
+      "data": {
+        "name": "テキスト要素",
+        "content": "こんにちは、世界！",
+        "fontSize": 24,
+        "fills": [
+          { "type": "SOLID", "color": { "r": 0.1, "g": 0.1, "b": 0.1 } }
+        ],
+        "x": 20,
+        "y": 50
+      }
+    },
+    {
+      "type": "createRectangle",
+      "data": {
+        "name": "矩形",
+        "width": 200,
+        "height": 100,
+        "fills": [{ "type": "SOLID", "color": { "r": 0.2, "g": 0.6, "b": 1 } }],
+        "x": 20,
+        "y": 100,
+        "cornerRadius": 8
+      }
+    }
+  ]
 }
 ```
 

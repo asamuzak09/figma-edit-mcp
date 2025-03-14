@@ -69,235 +69,23 @@ export class FigmaServer {
                 description: "Figma file ID"
               },
               updates: {
-                type: "object",
-                description: "Changes to apply to the file",
-                properties: {
-                  createFrame: {
-                    type: "object",
-                    description: "Create a frame",
-                    properties: {
-                      name: { type: "string" },
-                      width: { type: "number" },
-                      height: { type: "number" },
-                      x: { type: "number" },
-                      y: { type: "number" },
-                      fills: { type: "array" },
-                      cornerRadius: { type: "number" },
-                      layoutMode: { type: "string", enum: ["NONE", "HORIZONTAL", "VERTICAL"] }
+                type: "array",
+                description: "Multiple updates to apply in a single request",
+                items: {
+                  type: "object",
+                  properties: {
+                    type: {
+                      type: "string",
+                      enum: ["createFrame", "createText", "createRectangle", "createEllipse", "createLine", "createImage", "createComponent"]
+                    },
+                    data: {
+                      type: "object"
                     }
                   },
-                  createText: {
-                    oneOf: [
-                      {
-                        type: "object",
-                        description: "Create a text element",
-                        properties: {
-                          name: { type: "string" },
-                          content: { type: "string" },
-                          fontSize: { type: "number" },
-                          fontWeight: { type: "string" },
-                          x: { type: "number" },
-                          y: { type: "number" },
-                          fills: { type: "array" }
-                        }
-                      },
-                      {
-                        type: "array",
-                        description: "Create multiple text elements",
-                        items: {
-                          type: "object",
-                          properties: {
-                            name: { type: "string" },
-                            content: { type: "string" },
-                            fontSize: { type: "number" },
-                            fontWeight: { type: "string" },
-                            x: { type: "number" },
-                            y: { type: "number" },
-                            fills: { type: "array" }
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  createRectangle: {
-                    oneOf: [
-                      {
-                        type: "object",
-                        description: "Create a rectangle",
-                        properties: {
-                          name: { type: "string" },
-                          width: { type: "number" },
-                          height: { type: "number" },
-                          x: { type: "number" },
-                          y: { type: "number" },
-                          fills: { type: "array" },
-                          cornerRadius: { type: "number" },
-                          strokes: { type: "array" },
-                          strokeWeight: { type: "number" }
-                        }
-                      },
-                      {
-                        type: "array",
-                        description: "Create multiple rectangles",
-                        items: {
-                          type: "object",
-                          properties: {
-                            name: { type: "string" },
-                            width: { type: "number" },
-                            height: { type: "number" },
-                            x: { type: "number" },
-                            y: { type: "number" },
-                            fills: { type: "array" },
-                            cornerRadius: { type: "number" },
-                            strokes: { type: "array" },
-                            strokeWeight: { type: "number" }
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  createEllipse: {
-                    oneOf: [
-                      {
-                        type: "object",
-                        description: "Create an ellipse",
-                        properties: {
-                          name: { type: "string" },
-                          width: { type: "number" },
-                          height: { type: "number" },
-                          x: { type: "number" },
-                          y: { type: "number" },
-                          fills: { type: "array" },
-                          strokes: { type: "array" },
-                          strokeWeight: { type: "number" },
-                          arcData: { type: "object" }
-                        }
-                      },
-                      {
-                        type: "array",
-                        description: "Create multiple ellipses",
-                        items: {
-                          type: "object",
-                          properties: {
-                            name: { type: "string" },
-                            width: { type: "number" },
-                            height: { type: "number" },
-                            x: { type: "number" },
-                            y: { type: "number" },
-                            fills: { type: "array" },
-                            strokes: { type: "array" },
-                            strokeWeight: { type: "number" },
-                            arcData: { type: "object" }
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  createLine: {
-                    oneOf: [
-                      {
-                        type: "object",
-                        description: "Create a line",
-                        properties: {
-                          name: { type: "string" },
-                          points: { type: "array" },
-                          strokes: { type: "array" },
-                          strokeWeight: { type: "number" },
-                          strokeCap: { type: "string" }
-                        }
-                      },
-                      {
-                        type: "array",
-                        description: "Create multiple lines",
-                        items: {
-                          type: "object",
-                          properties: {
-                            name: { type: "string" },
-                            points: { type: "array" },
-                            strokes: { type: "array" },
-                            strokeWeight: { type: "number" },
-                            strokeCap: { type: "string" }
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  createImage: {
-                    oneOf: [
-                      {
-                        type: "object",
-                        description: "Create an image",
-                        properties: {
-                          name: { type: "string" },
-                          imageUrl: { type: "string" },
-                          width: { type: "number" },
-                          height: { type: "number" },
-                          x: { type: "number" },
-                          y: { type: "number" },
-                          scaleMode: { type: "string", enum: ["FILL", "FIT", "CROP", "TILE"] }
-                        }
-                      },
-                      {
-                        type: "array",
-                        description: "Create multiple images",
-                        items: {
-                          type: "object",
-                          properties: {
-                            name: { type: "string" },
-                            imageUrl: { type: "string" },
-                            width: { type: "number" },
-                            height: { type: "number" },
-                            x: { type: "number" },
-                            y: { type: "number" },
-                            scaleMode: { type: "string", enum: ["FILL", "FIT", "CROP", "TILE"] }
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  createComponent: {
-                    oneOf: [
-                      {
-                        type: "object",
-                        description: "Create a component",
-                        properties: {
-                          name: { type: "string" },
-                          description: { type: "string" },
-                          width: { type: "number" },
-                          height: { type: "number" },
-                          x: { type: "number" },
-                          y: { type: "number" },
-                          fills: { type: "array" },
-                          strokes: { type: "array" },
-                          strokeWeight: { type: "number" },
-                          cornerRadius: { type: "number" }
-                        }
-                      },
-                      {
-                        type: "array",
-                        description: "Create multiple components",
-                        items: {
-                          type: "object",
-                          properties: {
-                            name: { type: "string" },
-                            description: { type: "string" },
-                            width: { type: "number" },
-                            height: { type: "number" },
-                            x: { type: "number" },
-                            y: { type: "number" },
-                            fills: { type: "array" },
-                            strokes: { type: "array" },
-                            strokeWeight: { type: "number" },
-                            cornerRadius: { type: "number" }
-                          }
-                        }
-                      }
-                    ]
-                  }
+                  required: ["type", "data"]
                 }
               }
-            },
-            required: ["fileId", "updates"]
+            }
           }
         }]
       })
@@ -319,7 +107,51 @@ export class FigmaServer {
           console.error(`Received figma_update request for file ${fileId}`);
           
           // メッセージキューに追加
-          const success = addToMessageQueue(fileId, updates);
+          let success = false;
+          
+          if (updates && Array.isArray(updates)) {
+            // 更新の処理
+            console.error(`Processing updates with ${updates.length} items`);
+            
+            // テキスト要素のcontentパラメータをチェック
+            for (const update of updates) {
+              if (update.type === 'createText') {
+                if (!update.data || !update.data.content) {
+                  const errorMessage = `Error: Missing required parameter "content" for createText element "${update.data?.name || 'unnamed'}"`;
+                  console.error(errorMessage);
+                  return {
+                    content: [{
+                      type: "text",
+                      text: errorMessage
+                    }],
+                    isError: true
+                  };
+                } else if (update.data.content === '') {
+                  const errorMessage = `Error: Parameter "content" cannot be empty for createText element "${update.data.name || 'unnamed'}"`;
+                  console.error(errorMessage);
+                  return {
+                    content: [{
+                      type: "text",
+                      text: errorMessage
+                    }],
+                    isError: true
+                  };
+                }
+              }
+            }
+            
+            // 更新をそのままキューに追加（変換せずに）
+            success = addToMessageQueue(fileId, { updates });
+          } else {
+            console.error(`No valid updates found in request`);
+            return {
+              content: [{
+                type: "text",
+                text: `Error: No valid updates found in request`
+              }],
+              isError: true
+            };
+          }
           
           if (success) {
             console.error(`Successfully added update to message queue for file ${fileId}`);

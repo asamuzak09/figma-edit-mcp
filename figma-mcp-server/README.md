@@ -31,7 +31,7 @@ FIGMA_ACCESS_TOKEN=your_figma_access_token node build/index.js
 
 ## 環境変数
 
-- `PORT`: サーバーのポート番号（デフォルト: 3000）
+- `PORT`: サーバーのポート番号（デフォルト: 5678）
 - `FIGMA_ACCESS_TOKEN`: Figma API のアクセストークン（必須）
 
 ## API エンドポイント
@@ -112,6 +112,24 @@ Figma ファイルの更新リクエストを処理します。
 ```
 
 `createText` は単一のオブジェクトまたはオブジェクトの配列として指定できます。
+
+### createText
+
+テキスト要素を作成します。単一のオブジェクトまたはオブジェクトの配列として指定できます。
+
+```json
+{
+  "name": "Text Name",
+  "content": "Hello World", // 必須パラメータ
+  "fontSize": 24,
+  "fontWeight": "Bold",
+  "fills": [{ "type": "SOLID", "color": { "r": 0.1, "g": 0.1, "b": 0.1 } }],
+  "x": 120,
+  "y": 120
+}
+```
+
+**注意**: `content`パラメータは必須です。このパラメータがない場合、エラーが返されます。
 
 ## 内部アーキテクチャ
 
