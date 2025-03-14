@@ -36,9 +36,9 @@ FIGMA_ACCESS_TOKEN=your_figma_access_token node build/index.js
 
 ## API エンドポイント
 
-### POST /plugin/register
+### POST /plugin/healthcheck
 
-Figma プラグインの登録を処理します。
+Figma プラグインの接続状態を確認します。
 
 リクエストボディ:
 
@@ -120,7 +120,7 @@ Figma ファイルの更新リクエストを処理します。
 1. **HTTP サーバー（Express）**:
 
    - Figma プラグインとの通信を担当
-   - プラグイン登録とポーリングリクエストを処理
+   - プラグイン接続確認とポーリングリクエストを処理
    - メッセージキューを管理
 
 2. **MCP サーバー（StdioServerTransport）**:

@@ -34,7 +34,7 @@ let pluginConnections: Record<string, any> = {};
 let messageQueues: Record<string, any[]> = {};
 
 // プラグインの接続状態を確認するエンドポイント
-app.post('/plugin/register', (req, res) => {
+app.post('/plugin/healthcheck', (req, res) => {
   const { pluginId, fileId } = req.body;
   if (!pluginId || !fileId) {
     return res.status(400).json({ error: 'pluginId and fileId are required' });
@@ -51,7 +51,7 @@ app.post('/plugin/register', (req, res) => {
     messageQueues[fileId] = [];
   }
   
-  console.error(`Plugin ${pluginId} registered for file ${fileId}`);
+  console.error(`Plugin ${pluginId} healthcheck successful for file ${fileId}`);
   res.json({ success: true });
 });
 
