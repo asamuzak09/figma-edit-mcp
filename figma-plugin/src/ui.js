@@ -157,5 +157,4 @@ const html = `
 </body>
 </html>
 `;
-
-export default html; 
+export default html;

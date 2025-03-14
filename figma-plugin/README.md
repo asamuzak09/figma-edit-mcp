@@ -34,7 +34,7 @@ npm run build
 
 1. MCP サーバーを起動
 2. Figma でプラグインを起動
-3. プラグイン UI で「Connect to MCP Server」ボタンをクリック
+3. プラグイン UI で「Connect to MCP Server」ボタンをクリックして接続を確立
 4. Cursor から MCP サーバーに更新リクエストを送信
 5. プラグインが自動的に更新を適用
 

@@ -45,10 +45,10 @@ function startPolling() {
 }
 
 // MCPサーバーにプラグインを登録
-async function registerWithServer() {
+async function healthcheckWithServer() {
   try {
-    debug('Registering with MCP server...');
-    const response = await fetch(`${MCP_SERVER_URL}/plugin/register`, {
+    debug('Connecting to MCP server...');
+    const response = await fetch(`${MCP_SERVER_URL}/plugin/healthcheck`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -64,14 +64,14 @@ async function registerWithServer() {
     }
 
     const data = await response.json();
-    debug('Registration successful:', data);
+    debug('Connection successful:', data);
     figma.ui.postMessage({ type: 'log', message: `Connected to MCP server with file ID: ${fileId}` });
     
-    // 登録成功後、ポーリングを開始
+    // 接続成功後、ポーリングを開始
     startPolling();
   } catch (error: unknown) {
-    console.error('Failed to register with MCP server:', error);
-    debug('Registration error:', error);
+    console.error('Failed to connect to MCP server:', error);
+    debug('Connection error:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
     figma.ui.postMessage({ type: 'error', message: `Failed to connect to MCP server: ${errorMessage}` });
   }
@@ -230,7 +230,7 @@ function createTextElement(textData: {
 // UIからのメッセージを処理
 figma.ui.onmessage = (msg) => {
   if (msg.type === 'register') {
-    registerWithServer();
+    healthcheckWithServer();
   } else if (msg.type === 'cancel') {
     if (pollingInterval) {
       clearInterval(pollingInterval);
@@ -240,5 +240,5 @@ figma.ui.onmessage = (msg) => {
   }
 };
 
-// 初期化時に登録を実行
-registerWithServer(); 
+// 初期化時に接続を実行
+healthcheckWithServer(); 
