@@ -2,9 +2,9 @@
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
-import { FIGMA_ACCESS_TOKEN, PORT } from './config';
-import { pluginRouter } from './api/plugin-api';
-import { FigmaServer } from './mcp/figma-server';
+import { FIGMA_ACCESS_TOKEN, PORT } from './config/index.js';
+import { pluginRouter } from './api/plugin-api.js';
+import { FigmaServer } from './mcp/figma-server.js';
 
 // アクセストークンの確認
 if (!FIGMA_ACCESS_TOKEN) {

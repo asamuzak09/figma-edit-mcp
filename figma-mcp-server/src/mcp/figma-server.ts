@@ -6,9 +6,9 @@ import {
   ErrorCode,
   McpError
 } from "@modelcontextprotocol/sdk/types.js";
-import { FigmaUpdateParams } from '../types';
-import { SERVER_NAME, SERVER_VERSION, TOOL_NAME, TOOL_DESCRIPTION } from '../config';
-import { addToMessageQueue } from '../utils/message-queue';
+import { FigmaUpdateParams } from '../types.js';
+import { SERVER_NAME, SERVER_VERSION, TOOL_NAME, TOOL_DESCRIPTION } from '../config/index.js';
+import { addToMessageQueue } from '../utils/message-queue.js';
 
 /**
  * Figma MCPサーバークラス
@@ -70,7 +70,231 @@ export class FigmaServer {
               },
               updates: {
                 type: "object",
-                description: "Changes to apply to the file"
+                description: "Changes to apply to the file",
+                properties: {
+                  createFrame: {
+                    type: "object",
+                    description: "Create a frame",
+                    properties: {
+                      name: { type: "string" },
+                      width: { type: "number" },
+                      height: { type: "number" },
+                      x: { type: "number" },
+                      y: { type: "number" },
+                      fills: { type: "array" },
+                      cornerRadius: { type: "number" },
+                      layoutMode: { type: "string", enum: ["NONE", "HORIZONTAL", "VERTICAL"] }
+                    }
+                  },
+                  createText: {
+                    oneOf: [
+                      {
+                        type: "object",
+                        description: "Create a text element",
+                        properties: {
+                          name: { type: "string" },
+                          content: { type: "string" },
+                          fontSize: { type: "number" },
+                          fontWeight: { type: "string" },
+                          x: { type: "number" },
+                          y: { type: "number" },
+                          fills: { type: "array" }
+                        }
+                      },
+                      {
+                        type: "array",
+                        description: "Create multiple text elements",
+                        items: {
+                          type: "object",
+                          properties: {
+                            name: { type: "string" },
+                            content: { type: "string" },
+                            fontSize: { type: "number" },
+                            fontWeight: { type: "string" },
+                            x: { type: "number" },
+                            y: { type: "number" },
+                            fills: { type: "array" }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  createRectangle: {
+                    oneOf: [
+                      {
+                        type: "object",
+                        description: "Create a rectangle",
+                        properties: {
+                          name: { type: "string" },
+                          width: { type: "number" },
+                          height: { type: "number" },
+                          x: { type: "number" },
+                          y: { type: "number" },
+                          fills: { type: "array" },
+                          cornerRadius: { type: "number" },
+                          strokes: { type: "array" },
+                          strokeWeight: { type: "number" }
+                        }
+                      },
+                      {
+                        type: "array",
+                        description: "Create multiple rectangles",
+                        items: {
+                          type: "object",
+                          properties: {
+                            name: { type: "string" },
+                            width: { type: "number" },
+                            height: { type: "number" },
+                            x: { type: "number" },
+                            y: { type: "number" },
+                            fills: { type: "array" },
+                            cornerRadius: { type: "number" },
+                            strokes: { type: "array" },
+                            strokeWeight: { type: "number" }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  createEllipse: {
+                    oneOf: [
+                      {
+                        type: "object",
+                        description: "Create an ellipse",
+                        properties: {
+                          name: { type: "string" },
+                          width: { type: "number" },
+                          height: { type: "number" },
+                          x: { type: "number" },
+                          y: { type: "number" },
+                          fills: { type: "array" },
+                          strokes: { type: "array" },
+                          strokeWeight: { type: "number" },
+                          arcData: { type: "object" }
+                        }
+                      },
+                      {
+                        type: "array",
+                        description: "Create multiple ellipses",
+                        items: {
+                          type: "object",
+                          properties: {
+                            name: { type: "string" },
+                            width: { type: "number" },
+                            height: { type: "number" },
+                            x: { type: "number" },
+                            y: { type: "number" },
+                            fills: { type: "array" },
+                            strokes: { type: "array" },
+                            strokeWeight: { type: "number" },
+                            arcData: { type: "object" }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  createLine: {
+                    oneOf: [
+                      {
+                        type: "object",
+                        description: "Create a line",
+                        properties: {
+                          name: { type: "string" },
+                          points: { type: "array" },
+                          strokes: { type: "array" },
+                          strokeWeight: { type: "number" },
+                          strokeCap: { type: "string" }
+                        }
+                      },
+                      {
+                        type: "array",
+                        description: "Create multiple lines",
+                        items: {
+                          type: "object",
+                          properties: {
+                            name: { type: "string" },
+                            points: { type: "array" },
+                            strokes: { type: "array" },
+                            strokeWeight: { type: "number" },
+                            strokeCap: { type: "string" }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  createImage: {
+                    oneOf: [
+                      {
+                        type: "object",
+                        description: "Create an image",
+                        properties: {
+                          name: { type: "string" },
+                          imageUrl: { type: "string" },
+                          width: { type: "number" },
+                          height: { type: "number" },
+                          x: { type: "number" },
+                          y: { type: "number" },
+                          scaleMode: { type: "string", enum: ["FILL", "FIT", "CROP", "TILE"] }
+                        }
+                      },
+                      {
+                        type: "array",
+                        description: "Create multiple images",
+                        items: {
+                          type: "object",
+                          properties: {
+                            name: { type: "string" },
+                            imageUrl: { type: "string" },
+                            width: { type: "number" },
+                            height: { type: "number" },
+                            x: { type: "number" },
+                            y: { type: "number" },
+                            scaleMode: { type: "string", enum: ["FILL", "FIT", "CROP", "TILE"] }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  createComponent: {
+                    oneOf: [
+                      {
+                        type: "object",
+                        description: "Create a component",
+                        properties: {
+                          name: { type: "string" },
+                          description: { type: "string" },
+                          width: { type: "number" },
+                          height: { type: "number" },
+                          x: { type: "number" },
+                          y: { type: "number" },
+                          fills: { type: "array" },
+                          strokes: { type: "array" },
+                          strokeWeight: { type: "number" },
+                          cornerRadius: { type: "number" }
+                        }
+                      },
+                      {
+                        type: "array",
+                        description: "Create multiple components",
+                        items: {
+                          type: "object",
+                          properties: {
+                            name: { type: "string" },
+                            description: { type: "string" },
+                            width: { type: "number" },
+                            height: { type: "number" },
+                            x: { type: "number" },
+                            y: { type: "number" },
+                            fills: { type: "array" },
+                            strokes: { type: "array" },
+                            strokeWeight: { type: "number" },
+                            cornerRadius: { type: "number" }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
               }
             },
             required: ["fileId", "updates"]

@@ -1,4 +1,4 @@
-import { Message, PluginConnection } from '../types';
+import { Message, PluginConnection } from '../types.js';
 
 // プラグインからの接続を管理
 export const pluginConnections: Record<string, PluginConnection> = {};
@@ -14,7 +14,8 @@ export const messageQueues: Record<string, Message[]> = {};
  */
 export function addToMessageQueue(fileId: string, updates: any): boolean {
   try {
-    console.error(`Attempting to add message to queue for file ${fileId}`);
+    // 重要なログのみ残す
+    console.error(`Adding message to queue for file ${fileId}`);
     
     // プラグインが接続されているか確認
     if (!pluginConnections[fileId]) {
@@ -27,8 +28,6 @@ export function addToMessageQueue(fileId: string, updates: any): boolean {
         lastSeen: new Date(),
         status: 'pending'
       };
-    } else {
-      console.error(`Found existing connection for file ${fileId}: ${JSON.stringify(pluginConnections[fileId])}`);
     }
     
     // メッセージをキューに追加
@@ -44,9 +43,7 @@ export function addToMessageQueue(fileId: string, updates: any): boolean {
     };
     
     messageQueues[fileId].push(newMessage);
-    console.error(`Message directly added to queue for file ${fileId}`);
-    console.error(`Queue length: ${messageQueues[fileId].length}`);
-    console.error(`Queue content: ${JSON.stringify(messageQueues[fileId], null, 2)}`);
+    console.error(`Message added to queue. Queue length: ${messageQueues[fileId].length}`);
     
     return true;
   } catch (error) {
@@ -64,10 +61,9 @@ export function getAndClearMessages(fileId: string): Message[] {
   const messages = messageQueues[fileId] || [];
   
   if (messages.length > 0) {
-    console.error(`Returning ${messages.length} messages for file ${fileId}`);
+    console.error(`Found ${messages.length} messages for file ${fileId}`);
     // メッセージを返した後、キューをクリア
     messageQueues[fileId] = [];
-    console.error(`Queue cleared for file ${fileId}`);
   }
   
   return messages;
