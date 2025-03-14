@@ -66,6 +66,7 @@ async function healthcheckWithServer() {
     const data = await response.json();
     debug('Connection successful:', data);
     figma.ui.postMessage({ type: 'log', message: `Connected to MCP server with file ID: ${fileId}` });
+    figma.ui.postMessage({ type: 'connection-success', fileId });
     
     // 接続成功後、ポーリングを開始
     startPolling();
@@ -74,6 +75,7 @@ async function healthcheckWithServer() {
     debug('Connection error:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
     figma.ui.postMessage({ type: 'error', message: `Failed to connect to MCP server: ${errorMessage}` });
+    figma.ui.postMessage({ type: 'connection-error', error: errorMessage });
   }
 }
 

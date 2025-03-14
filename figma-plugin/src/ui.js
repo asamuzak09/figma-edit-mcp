@@ -137,10 +137,10 @@ const html = `
       
       if (!message) return;
       
-      if (message.type === 'registration-success') {
+      if (message.type === 'connection-success') {
         updateStatus(true);
         addLogEntry('Connected to MCP server with file ID: ' + message.fileId, 'success');
-      } else if (message.type === 'registration-error') {
+      } else if (message.type === 'connection-error') {
         updateStatus(false);
         addLogEntry('Failed to connect to MCP server: ' + message.error, 'error');
       } else if (message.type === 'mcp-message') {
