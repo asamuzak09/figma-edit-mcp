@@ -5,6 +5,9 @@
   "scripts": {
     "install-all": "cd figma-mcp-server && npm install && npm run build && cd ../figma-plugin && npm install && npm run build"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "author": "",
   "license": "ISC"
 }
