@@ -343,7 +343,7 @@ async function processUpdates(updates: any) {
 // テキスト要素を作成する関数
 function createTextElement(textData: {
   name?: string;
-  content?: string;
+  characters?: string;
   fontSize?: number;
   fills?: SolidPaint[];
   x?: number;
@@ -352,33 +352,32 @@ function createTextElement(textData: {
 }, index?: number) {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      // contentパラメータがない場合はエラーを返す
-      if (!textData.content) {
-        const error = new Error("Property 'content' is required for text elements");
+      // charactersパラメータがない場合はエラーを返す
+      if (!textData.characters) {
+        const error = new Error("Property 'characters' is required for text elements");
         debug('Error creating text element:', error);
-        figma.notify('テキスト要素の作成に失敗しました: contentパラメータが必要です', { error: true });
+        figma.notify('テキスト要素の作成に失敗しました: charactersパラメータが必要です', { error: true });
         reject(error);
         return;
       }
+const { name, characters, fontSize, fills, x, y, fontWeight } = textData;
+const text = figma.createText();
+text.name = name || `New Text ${index !== undefined ? index + 1 : ''}`;
 
-      const { name, content, fontSize, fills, x, y, fontWeight } = textData;
-      const text = figma.createText();
-      text.name = name || `New Text ${index !== undefined ? index + 1 : ''}`;
-      
-      // 位置の設定
-      if (x !== undefined) text.x = x;
-      if (y !== undefined) text.y = y;
-      
-      // フォントの読み込みを待機（awaitを使用して同期的に処理）
-      const fontStyle = fontWeight === 'Bold' ? 'Bold' : 'Regular';
-      
-      try {
-        // 常にフォントを読み込む（キャッシュされていれば高速に完了する）
-        debug('Loading font:', { family: "Inter", style: fontStyle });
-        await figma.loadFontAsync({ family: "Inter", style: fontStyle });
-        
-        // フォントが読み込まれた後にテキストを設定
-        text.characters = content;
+// 位置の設定
+if (x !== undefined) text.x = x;
+if (y !== undefined) text.y = y;
+
+// フォントの読み込みを待機（awaitを使用して同期的に処理）
+const fontStyle = fontWeight === 'Bold' ? 'Bold' : 'Regular';
+
+try {
+  // 常にフォントを読み込む（キャッシュされていれば高速に完了する）
+  debug('Loading font:', { family: "Inter", style: fontStyle });
+  await figma.loadFontAsync({ family: "Inter", style: fontStyle });
+  
+  // フォントが読み込まれた後にテキストを設定
+  text.characters = characters;
         if (fontSize) text.fontSize = fontSize;
         if (fontWeight === 'Bold') text.fontName = { family: "Inter", style: "Bold" };
         
@@ -394,7 +393,7 @@ function createTextElement(textData: {
         
         // 現在のページに追加
         figma.currentPage.appendChild(text);
-        debug('Text created:', { name: text.name, id: text.id, content: text.characters });
+        debug('Text created:', { name: text.name, id: text.id, characters: text.characters });
         resolve();
       } catch (e) {
         debug('Error loading font:', e);

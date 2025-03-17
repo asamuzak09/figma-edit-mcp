@@ -19,11 +19,11 @@ export async function handleUpdateFileTool(params: FigmaUpdateParams) {
       // 更新の処理
       console.error(`Processing updates with ${updates.length} items`);
       
-      // テキスト要素のcontentパラメータをチェック
+      // テキスト要素のcharactersパラメータをチェック
       for (const update of updates) {
         if (update.type === 'createText') {
-          if (!update.data || !update.data.content) {
-            const errorMessage = `Error: Missing required parameter "content" for createText element "${update.data?.name || 'unnamed'}"`;
+          if (!update.data || !update.data.characters) {
+            const errorMessage = `Error: Missing required parameter "characters" for createText element "${update.data?.name || 'unnamed'}"`;
             console.error(errorMessage);
             return {
               content: [{
@@ -32,8 +32,8 @@ export async function handleUpdateFileTool(params: FigmaUpdateParams) {
               }],
               isError: true
             };
-          } else if (update.data.content === '') {
-            const errorMessage = `Error: Parameter "content" cannot be empty for createText element "${update.data.name || 'unnamed'}"`;
+          } else if (update.data.characters === '') {
+            const errorMessage = `Error: Parameter "characters" cannot be empty for createText element "${update.data.name || 'unnamed'}"`;
             console.error(errorMessage);
             return {
               content: [{
@@ -46,7 +46,7 @@ export async function handleUpdateFileTool(params: FigmaUpdateParams) {
         }
       }
       
-      // 更新をそのままキューに追加（変換せずに）
+      // 更新をそのままキューに追加
       success = addToMessageQueue(fileId, { updates });
     } else {
       console.error(`No valid updates found in request`);

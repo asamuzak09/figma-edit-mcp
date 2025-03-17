@@ -340,15 +340,15 @@ function processUpdates(updates) {
 function createTextElement(textData, index) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
         try {
-            // contentパラメータがない場合はエラーを返す
-            if (!textData.content) {
-                const error = new Error("Property 'content' is required for text elements");
+            // charactersパラメータがない場合はエラーを返す
+            if (!textData.characters) {
+                const error = new Error("Property 'characters' is required for text elements");
                 debug('Error creating text element:', error);
-                figma.notify('テキスト要素の作成に失敗しました: contentパラメータが必要です', { error: true });
+                figma.notify('テキスト要素の作成に失敗しました: charactersパラメータが必要です', { error: true });
                 reject(error);
                 return;
             }
-            const { name, content, fontSize, fills, x, y, fontWeight } = textData;
+            const { name, characters, fontSize, fills, x, y, fontWeight } = textData;
             const text = figma.createText();
             text.name = name || `New Text ${index !== undefined ? index + 1 : ''}`;
             // 位置の設定
@@ -363,7 +363,7 @@ function createTextElement(textData, index) {
                 debug('Loading font:', { family: "Inter", style: fontStyle });
                 yield figma.loadFontAsync({ family: "Inter", style: fontStyle });
                 // フォントが読み込まれた後にテキストを設定
-                text.characters = content;
+                text.characters = characters;
                 if (fontSize)
                     text.fontSize = fontSize;
                 if (fontWeight === 'Bold')
@@ -380,7 +380,7 @@ function createTextElement(textData, index) {
                 }
                 // 現在のページに追加
                 figma.currentPage.appendChild(text);
-                debug('Text created:', { name: text.name, id: text.id, content: text.characters });
+                debug('Text created:', { name: text.name, id: text.id, characters: text.characters });
                 resolve();
             }
             catch (e) {

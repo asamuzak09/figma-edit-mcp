@@ -88,7 +88,7 @@ export const updateFileMetadata: ToolUsageInfo = {
       "type": "createText",
       "data": {
         "name": "テキスト名",
-        "content": "テキスト内容",
+        "characters": "テキスト内容",
         "fontSize": 24,
         "fontWeight": "Bold",
         "fills": [
@@ -123,7 +123,7 @@ export const updateFileMetadata: ToolUsageInfo = {
       "type": "createText",
       "data": {
         "name": "タイトル",
-        "content": "見出し",
+        "characters": "見出し",
         "fontSize": 24,
         "fontWeight": "Bold",
         "fills": [
@@ -140,7 +140,7 @@ export const updateFileMetadata: ToolUsageInfo = {
       "type": "createText",
       "data": {
         "name": "サブタイトル",
-        "content": "サブ見出し",
+        "characters": "サブ見出し",
         "fontSize": 18,
         "fills": [
           {
@@ -410,7 +410,7 @@ export const updateFileMetadata: ToolUsageInfo = {
       "type": "createText",
       "data": {
         "name": "タイトル",
-        "content": "プロダクトカード",
+        "characters": "プロダクトカード",
         "fontSize": 24,
         "fontWeight": "Bold",
         "fills": [{ "type": "SOLID", "color": { "r": 1, "g": 1, "b": 1 } }],
@@ -422,7 +422,7 @@ export const updateFileMetadata: ToolUsageInfo = {
       "type": "createText",
       "data": {
         "name": "説明",
-        "content": "これは製品の詳細説明です。複数行にわたるテキストを表示できます。",
+        "characters": "これは製品の詳細説明です。複数行にわたるテキストを表示できます。",
         "fontSize": 16,
         "fills": [{ "type": "SOLID", "color": { "r": 0.3, "g": 0.3, "b": 0.3 } }],
         "x": 120,
@@ -445,7 +445,7 @@ export const updateFileMetadata: ToolUsageInfo = {
       "type": "createText",
       "data": {
         "name": "ボタンテキスト",
-        "content": "購入する",
+        "characters": "購入する",
         "fontSize": 18,
         "fontWeight": "Bold",
         "fills": [{ "type": "SOLID", "color": { "r": 1, "g": 1, "b": 1 } }],
@@ -460,8 +460,9 @@ export const updateFileMetadata: ToolUsageInfo = {
     }
   ],
   notes: [
-    "テキスト要素を作成する場合は、必ず `content` パラメータを指定してください。",
+    "テキスト要素を作成する場合は、必ず `characters` パラメータを指定してください。",
     "色の値は 0 から 1 の範囲で指定します（RGB各チャンネル）。",
-    "フィグマファイルIDは、フィグマのURLから取得できます（例: https://www.figma.com/file/XXXXXXXXXXXX/FileName の XXXXXXXXXXXX 部分）。"
+    "フィグマファイルIDは、フィグマのURLから取得できます（例: https://www.figma.com/file/XXXXXXXXXXXX/FileName の XXXXXXXXXXXX 部分）。",
+    "座標系は左上を原点（0,0）とし、すべての要素（矩形、円形など）の位置は左上隅からの座標で指定します。特に円形要素の場合、中心ではなく左上隅からの座標であることに注意してください。"
   ]
 };
