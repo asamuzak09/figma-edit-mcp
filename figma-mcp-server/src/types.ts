@@ -172,4 +172,26 @@ export interface CreateComponentProps extends BaseNodeProps {
   width: number;
   height: number;
   description?: string;
-} 
+}
+
+// ツール使用方法取得パラメータの型
+export interface GetMcpToolUsageParams {
+  toolName: string;
+}
+
+// ツール使用方法の型
+export interface ToolUsageInfo {
+  name: string;
+  description: string;
+  inputSchema: any;
+  examples: ToolUsageExample[];
+  notes?: string[];
+}
+
+// ツール使用例の型
+export interface ToolUsageExample {
+  title: string;
+  description: string;
+  code: string;
+  result?: string;
+}

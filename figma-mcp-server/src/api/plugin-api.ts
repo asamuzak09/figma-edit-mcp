@@ -1,6 +1,6 @@
 import express from 'express';
 import { PluginHealthcheckRequest } from '../types.js';
-import { pluginConnections, getAndClearMessages, addToMessageQueue } from '../utils/message-queue.js';
+import { pluginConnections, getAndClearMessages, addToMessageQueue } from './message-queue.js';
 
 // プラグインAPI用のルーターを作成
 export const pluginRouter = express.Router();
