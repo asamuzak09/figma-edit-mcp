@@ -35,8 +35,8 @@ export const updateFileMetadata: ToolUsageInfo = {
   },
   examples: [
     {
-      title: "フレームの作成",
-      description: "新しいフレームを作成する例（レイアウト設定付き）",
+      title: "Creating a Frame",
+      description: "Example of creating a new frame with layout settings",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>update_file</tool_name>
@@ -47,7 +47,7 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createFrame",
       "data": {
-        "name": "フレーム名",
+        "name": "Frame Name",
         "width": 400,
         "height": 300,
         "fills": [
@@ -75,8 +75,8 @@ export const updateFileMetadata: ToolUsageInfo = {
 </use_mcp_tool>`
     },
     {
-      title: "テキスト要素の作成",
-      description: "高度なテキスト書式設定を含むテキスト要素の作成例",
+      title: "Creating a Text Element",
+      description: "Example of creating a text element with advanced formatting",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>update_file</tool_name>
@@ -87,8 +87,8 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createText",
       "data": {
-        "name": "テキスト名",
-        "characters": "テキスト内容",
+        "name": "Text Name",
+        "characters": "Text Content",
         "fontSize": 24,
         "fontWeight": "Bold",
         "fills": [
@@ -114,8 +114,8 @@ export const updateFileMetadata: ToolUsageInfo = {
 </use_mcp_tool>`
     },
     {
-      title: "複数のテキスト要素の作成",
-      description: "複数のテキスト要素を一度に作成する例",
+      title: "Creating Multiple Text Elements",
+      description: "Example of creating multiple text elements at once",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>update_file</tool_name>
@@ -126,8 +126,8 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createText",
       "data": {
-        "name": "タイトル",
-        "characters": "見出し",
+        "name": "Title",
+        "characters": "Heading",
         "fontSize": 24,
         "fontWeight": "Bold",
         "fills": [
@@ -143,8 +143,8 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createText",
       "data": {
-        "name": "サブタイトル",
-        "characters": "サブ見出し",
+        "name": "Subtitle",
+        "characters": "Subheading",
         "fontSize": 18,
         "fills": [
           {
@@ -162,8 +162,8 @@ export const updateFileMetadata: ToolUsageInfo = {
 </use_mcp_tool>`
     },
     {
-      title: "矩形の作成",
-      description: "ストローク（枠線）付きの矩形を作成する例",
+      title: "Creating a Rectangle",
+      description: "Example of creating a rectangle with stroke",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>update_file</tool_name>
@@ -174,7 +174,7 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createRectangle",
       "data": {
-        "name": "矩形名",
+        "name": "Rectangle Name",
         "width": 200,
         "height": 100,
         "fills": [
@@ -201,8 +201,8 @@ export const updateFileMetadata: ToolUsageInfo = {
 </use_mcp_tool>`
     },
     {
-      title: "複数の矩形の作成",
-      description: "異なる色の複数の矩形を作成する例",
+      title: "Creating Multiple Rectangles",
+      description: "Example of creating multiple rectangles with different colors",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>update_file</tool_name>
@@ -213,7 +213,7 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createRectangle",
       "data": {
-        "name": "青い矩形",
+        "name": "Blue Rectangle",
         "width": 200,
         "height": 100,
         "fills": [{ "type": "SOLID", "color": { "r": 0.2, "g": 0.6, "b": 1.0 } }],
@@ -224,7 +224,7 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createRectangle",
       "data": {
-        "name": "赤い矩形",
+        "name": "Red Rectangle",
         "width": 200,
         "height": 100,
         "fills": [{ "type": "SOLID", "color": { "r": 1.0, "g": 0.2, "b": 0.2 } }],
@@ -238,8 +238,8 @@ export const updateFileMetadata: ToolUsageInfo = {
 </use_mcp_tool>`
     },
     {
-      title: "楕円の作成",
-      description: "ストローク（枠線）付きの楕円を作成する例",
+      title: "Creating an Ellipse",
+      description: "Example of creating an ellipse with stroke",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>update_file</tool_name>
@@ -250,7 +250,7 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createEllipse",
       "data": {
-        "name": "楕円名",
+        "name": "Ellipse Name",
         "width": 200,
         "height": 100,
         "fills": [
@@ -276,8 +276,8 @@ export const updateFileMetadata: ToolUsageInfo = {
 </use_mcp_tool>`
     },
     {
-      title: "線の作成",
-      description: "矢印付きの線を作成する例",
+      title: "Creating a Line",
+      description: "Example of creating a line with arrow",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>update_file</tool_name>
@@ -288,7 +288,7 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createLine",
       "data": {
-        "name": "線名",
+        "name": "Line Name",
         "points": [
           { "x": 100, "y": 100 },
           { "x": 200, "y": 200 }
@@ -309,8 +309,8 @@ export const updateFileMetadata: ToolUsageInfo = {
 </use_mcp_tool>`
     },
     {
-      title: "画像の挿入",
-      description: "URLから画像を挿入する例",
+      title: "Inserting an Image",
+      description: "Example of inserting an image from URL",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>update_file</tool_name>
@@ -321,7 +321,7 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createImage",
       "data": {
-        "name": "画像名",
+        "name": "Image Name",
         "imageUrl": "https://example.com/image.jpg",
         "width": 300,
         "height": 200,
@@ -336,8 +336,8 @@ export const updateFileMetadata: ToolUsageInfo = {
 </use_mcp_tool>`
     },
     {
-      title: "コンポーネントの作成",
-      description: "再利用可能なコンポーネントを作成する例",
+      title: "Creating a Component",
+      description: "Example of creating a reusable component",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>update_file</tool_name>
@@ -348,8 +348,8 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createComponent",
       "data": {
-        "name": "コンポーネント名",
-        "description": "コンポーネントの説明",
+        "name": "Component Name",
+        "description": "Component Description",
         "width": 300,
         "height": 200,
         "fills": [
@@ -369,8 +369,8 @@ export const updateFileMetadata: ToolUsageInfo = {
 </use_mcp_tool>`
     },
     {
-      title: "複合的なデザイン作成",
-      description: "複数の要素タイプを組み合わせた複合的なデザインの例",
+      title: "Creating a Complex Design",
+      description: "Example of creating a complex design combining multiple element types",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>update_file</tool_name>
@@ -381,7 +381,7 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createFrame",
       "data": {
-        "name": "カード",
+        "name": "Card",
         "width": 300,
         "height": 400,
         "fills": [{ "type": "SOLID", "color": { "r": 1, "g": 1, "b": 1 } }],
@@ -401,7 +401,7 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createRectangle",
       "data": {
-        "name": "ヘッダー",
+        "name": "Header",
         "width": 300,
         "height": 150,
         "fills": [{ "type": "SOLID", "color": { "r": 0.2, "g": 0.6, "b": 1.0 } }],
@@ -413,8 +413,8 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createText",
       "data": {
-        "name": "タイトル",
-        "characters": "プロダクトカード",
+        "name": "Title",
+        "characters": "Product Card",
         "fontSize": 24,
         "fontWeight": "Bold",
         "fills": [{ "type": "SOLID", "color": { "r": 1, "g": 1, "b": 1 } }],
@@ -425,8 +425,8 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createText",
       "data": {
-        "name": "説明",
-        "characters": "これは製品の詳細説明です。複数行にわたるテキストを表示できます。長いテキストの場合は、幅を指定して自動リサイズモードを設定することで、テキストが適切に折り返されます。",
+        "name": "Description",
+        "characters": "This is a detailed product description. It can display text across multiple lines. For long text, you can specify the width and set the auto-resize mode to make the text wrap appropriately.",
         "fontSize": 16,
         "fills": [{ "type": "SOLID", "color": { "r": 0.3, "g": 0.3, "b": 0.3 } }],
         "x": 120,
@@ -440,7 +440,7 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createRectangle",
       "data": {
-        "name": "ボタン",
+        "name": "Button",
         "width": 200,
         "height": 50,
         "fills": [{ "type": "SOLID", "color": { "r": 0.2, "g": 0.8, "b": 0.4 } }],
@@ -452,8 +452,8 @@ export const updateFileMetadata: ToolUsageInfo = {
     {
       "type": "createText",
       "data": {
-        "name": "ボタンテキスト",
-        "characters": "購入する",
+        "name": "Button Text",
+        "characters": "Buy Now",
         "fontSize": 18,
         "fontWeight": "Bold",
         "fills": [{ "type": "SOLID", "color": { "r": 1, "g": 1, "b": 1 } }],
@@ -468,12 +468,12 @@ export const updateFileMetadata: ToolUsageInfo = {
     }
   ],
   notes: [
-    "テキスト要素を作成する場合は、必ず `characters` パラメータを指定してください。",
-    "テキストボックスのサイズを適切に設定するには、`width` パラメータと `textAutoResize` パラメータを使用してください。長いテキストの場合は、`width` を指定して `textAutoResize` を 'HEIGHT' に設定することで、テキストが適切に折り返されます。",
-    "テキストの行間隔を調整するには、`lineHeight` パラメータを使用してください。`unit` には 'PIXELS'（ピクセル単位）または 'PERCENT'（パーセント単位）を指定できます。",
-    "段落間の間隔を設定するには、`paragraphSpacing` パラメータを使用してください。",
-    "色の値は 0 から 1 の範囲で指定します（RGB各チャンネル）。",
-    "フィグマファイルIDは、フィグマのURLから取得できます（例: https://www.figma.com/file/XXXXXXXXXXXX/FileName の XXXXXXXXXXXX 部分）。",
-    "座標系は左上を原点（0,0）とし、すべての要素（矩形、円形など）の位置は左上隅からの座標で指定します。特に円形要素の場合、中心ではなく左上隅からの座標であることに注意してください。"
+    "When creating text elements, always specify the `characters` parameter.",
+    "To properly size text boxes, use the `width` parameter and the `textAutoResize` parameter. For long text, specify `width` and set `textAutoResize` to 'HEIGHT' to make the text wrap appropriately.",
+    "To adjust line spacing in text, use the `lineHeight` parameter. For `unit`, you can specify 'PIXELS' or 'PERCENT'.",
+    "To set spacing between paragraphs, use the `paragraphSpacing` parameter.",
+    "Color values are specified in the range from 0 to 1 (for each RGB channel).",
+    "Figma file IDs can be obtained from the Figma URL (e.g., the XXXXXXXXXXXX part in https://www.figma.com/file/XXXXXXXXXXXX/FileName).",
+    "The coordinate system has its origin (0,0) at the top left, and the position of all elements (rectangles, circles, etc.) is specified by coordinates from the top left corner. Note that for circular elements, the coordinates are from the top left corner, not the center."
   ]
 };

@@ -3,7 +3,7 @@ const html = `
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Cursor Figma Assistant</title>
+  <title>Figma MCP Assistant</title>
   <style>
     body {
       font-family: Inter, sans-serif;
@@ -87,8 +87,6 @@ const html = `
   </style>
 </head>
 <body>
-  <h2>Figma MCP Plugin</h2>
-
   <div id="status" class="status disconnected">
     Disconnected
   </div>
@@ -139,10 +137,10 @@ const html = `
       
       if (message.type === 'connection-success') {
         updateStatus(true);
-        addLogEntry('MCPサーバーに接続しました (ファイルID: ' + message.fileId + ')', 'success');
+        addLogEntry('Connected to MCP server (File ID: ' + message.fileId + ')', 'success');
       } else if (message.type === 'connection-error') {
         updateStatus(false);
-        addLogEntry('MCPサーバーへの接続に失敗しました: ' + message.error, 'error');
+        addLogEntry('Failed to connect to MCP server: ' + message.error, 'error');
       } else if (message.type === 'log') {
         addLogEntry(message.message);
       } else if (message.type === 'error') {

@@ -12,15 +12,15 @@ export const getToolUsageMetadata: ToolUsageInfo = {
     properties: {
       toolName: {
         type: "string",
-        description: "使用方法を取得したいツールの名前"
+        description: "Name of the tool for which to get usage information"
       }
     },
     required: ["toolName"]
   },
   examples: [
     {
-      title: "update_file ツールの使用方法を取得",
-      description: "update_file ツールの詳細な使用方法を取得する例",
+      title: "Getting Usage Information for the update_file Tool",
+      description: "Example of retrieving detailed usage information for the update_file tool",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>get_mcp_tool_usage</tool_name>

@@ -8,26 +8,26 @@ import { ToolUsageInfo } from '../../types.js';
 export function formatToolUsageInfo(toolUsageInfo: ToolUsageInfo): string {
   let result = `# ${toolUsageInfo.name}\n\n`;
   
-  // 説明
-  result += `## 説明\n${toolUsageInfo.description}\n\n`;
+  // Description
+  result += `## Description\n${toolUsageInfo.description}\n\n`;
   
-  // 入力スキーマ
-  result += `## パラメータ\n\`\`\`json\n${JSON.stringify(toolUsageInfo.inputSchema, null, 2)}\n\`\`\`\n\n`;
+  // Input schema
+  result += `## Parameters\n\`\`\`json\n${JSON.stringify(toolUsageInfo.inputSchema, null, 2)}\n\`\`\`\n\n`;
   
-  // 使用例
-  result += `## 使用例\n`;
+  // Examples
+  result += `## Examples\n`;
   toolUsageInfo.examples.forEach((example, index) => {
     result += `### ${index + 1}. ${example.title}\n`;
     result += `${example.description}\n\n`;
     result += `\`\`\`\n${example.code}\n\`\`\`\n\n`;
     if (example.result) {
-      result += `結果:\n\`\`\`\n${example.result}\n\`\`\`\n\n`;
+      result += `Result:\n\`\`\`\n${example.result}\n\`\`\`\n\n`;
     }
   });
   
-  // 注意事項
+  // Notes
   if (toolUsageInfo.notes && toolUsageInfo.notes.length > 0) {
-    result += `## 注意事項\n`;
+    result += `## Notes\n`;
     toolUsageInfo.notes.forEach(note => {
       result += `- ${note}\n`;
     });

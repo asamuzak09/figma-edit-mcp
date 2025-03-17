@@ -26,13 +26,13 @@ Promise.all([
   figma.loadFontAsync({ family: "Inter", style: "Regular" }),
   figma.loadFontAsync({ family: "Inter", style: "Bold" })
 ]).then(() => {
-  logToUI('フォントの読み込みが完了しました');
+  logToUI('Fonts loaded successfully');
   fontsLoaded = true;
   // フォントの読み込みが完了したら、サーバーに接続
   healthcheckWithServer();
 }).catch(error => {
   console.error('Error preloading fonts:', error);
-  logToUI('フォントの読み込みに失敗しましたが、接続を試みます', 'error');
+  logToUI('Failed to load fonts, but attempting to connect anyway', 'error');
   // エラーが発生しても接続は試みる
   healthcheckWithServer();
 });
@@ -61,7 +61,7 @@ function startPolling() {
 // MCPサーバーにプラグインを登録
 async function healthcheckWithServer() {
   try {
-    logToUI('MCPサーバーに接続しています...');
+    logToUI('Connecting to MCP server...');
     const response = await fetch(`${MCP_SERVER_URL}/plugin/healthcheck`, {
       method: 'POST',
       headers: {
@@ -78,7 +78,7 @@ async function healthcheckWithServer() {
     }
 
     const data = await response.json();
-    logToUI(`MCPサーバーに接続しました (ファイルID: ${fileId})`);
+    logToUI(`Connected to MCP server (File ID: ${fileId})`);
     figma.ui.postMessage({ type: 'connection-success', fileId });
     
     // 接続成功後、ポーリングを開始
@@ -86,7 +86,7 @@ async function healthcheckWithServer() {
   } catch (error: unknown) {
     console.error('Failed to connect to MCP server:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logToUI(`MCPサーバーへの接続に失敗しました: ${errorMessage}`, 'error');
+    logToUI(`Failed to connect to MCP server: ${errorMessage}`, 'error');
     figma.ui.postMessage({ type: 'connection-error', error: errorMessage });
   }
 }
@@ -110,7 +110,7 @@ async function pollForMessages() {
             await applyUpdates(message.updates);
           } catch (error) {
             console.error('Error applying updates:', error);
-            logToUI('更新の適用中にエラーが発生しました', 'error');
+            logToUI('Error occurred while applying updates', 'error');
           }
         }
       }
@@ -151,13 +151,13 @@ async function applyUpdates(updates: any) {
       await processUpdates(updates);
     }
     
-    logToUI('デザインを更新しました');
-    figma.notify('デザインを更新しました');
+    logToUI('Design updated successfully');
+    figma.notify('Design updated successfully');
   } catch (error: unknown) {
     console.error('Failed to apply updates:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logToUI(`更新の適用に失敗しました: ${errorMessage}`, 'error');
-    figma.notify('デザイン更新中にエラーが発生しました', { error: true });
+    logToUI(`Failed to apply updates: ${errorMessage}`, 'error');
+    figma.notify('Error occurred while updating design', { error: true });
   }
 }
 
@@ -334,8 +334,8 @@ function createTextElement(textData: {
       // charactersパラメータがない場合はエラーを返す
       if (!textData.characters) {
         const error = new Error("Property 'characters' is required for text elements");
-        logToUI('テキスト要素の作成に失敗しました: charactersパラメータが必要です', 'error');
-        figma.notify('テキスト要素の作成に失敗しました: charactersパラメータが必要です', { error: true });
+        logToUI('Failed to create text element: characters parameter is required', 'error');
+        figma.notify('Failed to create text element: characters parameter is required', { error: true });
         reject(error);
         return;
       }
@@ -810,6 +810,3 @@ figma.ui.onmessage = (msg) => {
     figma.closePlugin();
   }
 };
-
-// 初期化時の接続はフォントの読み込み完了後に行うため、ここでは実行しない
-// healthcheckWithServer();

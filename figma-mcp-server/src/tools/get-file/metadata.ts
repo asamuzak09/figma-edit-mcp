@@ -42,8 +42,8 @@ export const getFileMetadata: ToolUsageInfo = {
   },
   examples: [
     {
-      title: "基本的なファイル取得",
-      description: "Figmaファイルの基本情報を取得する例",
+      title: "Basic File Retrieval",
+      description: "Example of retrieving basic information from a Figma file",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>get_file</tool_name>
@@ -55,8 +55,8 @@ export const getFileMetadata: ToolUsageInfo = {
 </use_mcp_tool>`
     },
     {
-      title: "コンポーネントとスタイルを含むファイル取得",
-      description: "コンポーネントとスタイル情報を含めてFigmaファイルを取得する例",
+      title: "File Retrieval with Components and Styles",
+      description: "Example of retrieving a Figma file including component and style information",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>get_file</tool_name>
@@ -70,8 +70,8 @@ export const getFileMetadata: ToolUsageInfo = {
 </use_mcp_tool>`
     },
     {
-      title: "特定のノードを取得",
-      description: "特定のノードIDを指定してFigmaファイルの一部を取得する例",
+      title: "Retrieving Specific Nodes",
+      description: "Example of retrieving specific parts of a Figma file by specifying node IDs",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>get_file</tool_name>
@@ -84,8 +84,8 @@ export const getFileMetadata: ToolUsageInfo = {
 </use_mcp_tool>`
     },
     {
-      title: "取得する階層の深さを制限",
-      description: "取得するノード階層の深さを制限する例",
+      title: "Limiting the Depth of Retrieved Hierarchy",
+      description: "Example of limiting the depth of node hierarchy to retrieve",
       code: `<use_mcp_tool>
 <server_name>figma-mcp-server</server_name>
 <tool_name>get_file</tool_name>
@@ -99,11 +99,11 @@ export const getFileMetadata: ToolUsageInfo = {
     }
   ],
   notes: [
-    "fileIdパラメータは必須です。FigmaファイルIDは、FigmaのURLから取得できます（例: https://www.figma.com/file/XXXXXXXXXXXX/FileName の XXXXXXXXXXXX 部分）。",
-    "includeComponentsをtrueに設定すると、ファイル内のコンポーネント情報が含まれます。",
-    "includeStylesをtrueに設定すると、ファイル内のスタイル情報が含まれます。",
-    "includeNodesパラメータを使用すると、特定のノードIDのみを取得できます。",
-    "depthパラメータを使用すると、取得するノード階層の深さを制限できます。",
-    "レスポンスは大きくなる可能性があるため、必要な情報のみを取得することをお勧めします。"
+    "The fileId parameter is required. You can get the Figma file ID from the Figma URL (e.g., the XXXXXXXXXXXX part in https://www.figma.com/file/XXXXXXXXXXXX/FileName).",
+    "Setting includeComponents to true will include component information in the file.",
+    "Setting includeStyles to true will include style information in the file.",
+    "The includeNodes parameter allows you to retrieve only specific node IDs.",
+    "The depth parameter allows you to limit the depth of the node hierarchy to retrieve.",
+    "The response can be large, so it's recommended to retrieve only the information you need."
   ]
 };

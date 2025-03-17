@@ -1,48 +1,47 @@
 # Figma Edit MCP
 
-Figma ファイルを MCP から編集するためのツール。
-MCP 経由でテキストや図形、フレームなどを追加可能。
+A tool for editing Figma files via MCP.
+Add text, shapes, frames, and more through MCP.
 
-## 必要条件
+## Requirements
 
-- Node.js v20.0.0 以上
+- Node.js v20.0.0 or higher
 
-## インストレーション
+## Installation
 
-### セットアップ手順
+### Setup Instructions
 
-1. **リポジトリのクローン**
+1. **Clone the Repository**
 
 ```bash
 git clone https://github.com/asamuzak09/figma-edit-mcp.git
 cd figma-edit-mcp
 ```
 
-2. **依存関係のインストール**
+2. **Install Dependencies**
 
 ```bash
-
 npm run install-all
 ```
 
-このコマンドは、figma-mcp-serverとfigma-pluginの両方のディレクトリで依存関係をインストールし、ビルドを実行します。
+This command installs dependencies and runs the build in both the figma-mcp-server and figma-plugin directories.
 
-3. **Figma プラグインのインストール**
+3. **Install the Figma Plugin**
 
-Figma プラグインをローカルで開発モードでインストールするには：
+To install the Figma plugin locally in development mode:
 
-1. Figma デスクトップアプリを開く
-2. 右上のメニューから「Plugins」→「Development」→「Import plugin from manifest...」を選択
-3. figma-plugin/manifest.json ファイルを選択
-4. プラグインが開発モードでインストールされます
+1. Open the Figma desktop app
+2. From the menu in the top right, select "Plugins" → "Development" → "Import plugin from manifest..."
+3. Select the figma-plugin/manifest.json file
+4. The plugin will be installed in development mode
 
-### MCP の設定
+### MCP Configuration
 
-#### Cline の場合
+#### For Cline
 
-Cline でこのプラグインを使用するには、MCP サーバーの設定を追加する必要があります：
+To use this plugin with Cline, you need to add the MCP server configuration:
 
-1. 以下の設定を`mcpServers`オブジェクトに追加:
+1. Add the following configuration to the `mcpServers` object:
 
 ```json
 "figma-mcp-server": {
@@ -54,53 +53,53 @@ Cline でこのプラグインを使用するには、MCP サーバーの設定�
 }
 ```
 
-#### Cursor の場合
+#### For Cursor
 
-Cursor でこのプラグインを使用するには、MCP サーバーの設定を追加する必要があります：
+To use this plugin with Cursor, you need to add the MCP server configuration:
 
-1. 「Add MCP Server」をクリック
-2. 「Type」で「command」を選択
-3. 「Command」に以下を入力:
+1. Click "Add MCP Server"
+2. Select "command" for "Type"
+3. Enter the following for "Command":
 
 ```
 env FIGMA_ACCESS_TOKEN=your_figma_personal_access_token node /path/to/figma-edit-mcp/figma-mcp-server/build/index.js
 ```
 
-`/path/to/figma-edit-mcp`は、実際のリポジトリのパスに置き換えてください。
-`your_figma_personal_access_token`は、Figma Personal Access Token を入れてください。
+Replace `/path/to/figma-edit-mcp` with the actual path to the repository.
+Replace `your_figma_personal_access_token` with your Figma Personal Access Token.
 
-### Figma Personal Access Token の取得方法
+### How to Get a Figma Personal Access Token
 
-1. Figma にログイン
-2. 右上のプロフィールアイコンをクリック
-3. 「Settings」を選択
-4. 「Account」タブで「Personal access tokens」セクションに移動
-5. 「Create a new personal access token」をクリック
-6. トークン名を入力し、「Create token」をクリック
-7. 表示されたトークンをコピー（このトークンは一度しか表示されないので注意）
+1. Log in to Figma
+2. Click on your profile icon in the top right
+3. Select "Settings"
+4. Go to the "Personal access tokens" section in the "Account" tab
+5. Click "Create a new personal access token"
+6. Enter a name for the token and click "Create token"
+7. Copy the displayed token (note that this token will only be shown once)
 
-## 使用方法
+## Usage
 
-### Figma プラグインの使用
+### Using the Figma Plugin
 
-1. Figma を開く
-2. 右上のメニューから「Plugins」→「Development」→「Figma MCP Plugin」を選択
-3. プラグインが起動し、MCP サーバーに接続されます
+1. Open Figma
+2. From the menu in the top right, select "Plugins" → "Development" → "Figma MCP Plugin"
+3. The plugin will launch and connect to the MCP server
 
-## 主な機能
+## Main Features
 
-### ツール
+### Tools
 
-- **update_file**: Figma ファイルに要素を追加・更新するツール
-- **get_file**: Figma ファイルの内容を取得するツール
-- **get_mcp_tool_usage**: MCP ツールの使用方法情報を取得するツール
+- **update_file**: Tool to add and update elements in a Figma file
+- **get_file**: Tool to retrieve the contents of a Figma file
+- **get_mcp_tool_usage**: Tool to get usage information for MCP tools
 
-### update_fileで追加可能な要素タイプ
+### Element Types That Can Be Added with update_file
 
-- **createFrame**: 背景やコンテナとして使用するフレームを作成
-- **createText**: テキスト要素を作成（タイトル、説明文など）
-- **createRectangle**: 矩形を作成（ボタン、カードなど）
-- **createEllipse**: 楕円を作成（アイコン、装飾など）
-- **createLine**: 線を作成（区切り線、矢印など）
-- **createImage**: 画像を挿入（ロゴ、キャラクターなど）
-- **createComponent**: 再利用可能なコンポーネントを作成
+- **createFrame**: Create frames used as backgrounds or containers
+- **createText**: Create text elements (titles, descriptions, etc.)
+- **createRectangle**: Create rectangles (buttons, cards, etc.)
+- **createEllipse**: Create ellipses (icons, decorations, etc.)
+- **createLine**: Create lines (dividers, arrows, etc.)
+- **createImage**: Insert images (logos, characters, etc.)
+- **createComponent**: Create reusable components
