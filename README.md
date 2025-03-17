@@ -95,7 +95,7 @@ env FIGMA_ACCESS_TOKEN=your_figma_personal_access_token node /path/to/figma-edit
 - **get_file**: Figma ファイルの内容を取得するツール
 - **get_mcp_tool_usage**: MCP ツールの使用方法情報を取得するツール
 
-### 要素タイプ
+### update_fileで追加可能な要素タイプ
 
 - **createFrame**: 背景やコンテナとして使用するフレームを作成
 - **createText**: テキスト要素を作成（タイトル、説明文など）
