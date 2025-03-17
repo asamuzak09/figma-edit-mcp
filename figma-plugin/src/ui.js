@@ -139,18 +139,14 @@ const html = `
       
       if (message.type === 'connection-success') {
         updateStatus(true);
-        addLogEntry('Connected to MCP server with file ID: ' + message.fileId, 'success');
+        addLogEntry('MCPサーバーに接続しました (ファイルID: ' + message.fileId + ')', 'success');
       } else if (message.type === 'connection-error') {
         updateStatus(false);
-        addLogEntry('Failed to connect to MCP server: ' + message.error, 'error');
-      } else if (message.type === 'mcp-message') {
-        addLogEntry('Received message from MCP server: ' + JSON.stringify(message.message));
-      } else if (message.type === 'update-success') {
-        addLogEntry('Applied updates: ' + JSON.stringify(message.updates), 'success');
-      } else if (message.type === 'update-error') {
-        addLogEntry('Error applying updates: ' + message.error, 'error');
-      } else if (message.type === 'debug') {
-        addLogEntry(message.message, 'debug');
+        addLogEntry('MCPサーバーへの接続に失敗しました: ' + message.error, 'error');
+      } else if (message.type === 'log') {
+        addLogEntry(message.message);
+      } else if (message.type === 'error') {
+        addLogEntry(message.message, 'error');
       }
     };
   </script>

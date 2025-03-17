@@ -11,8 +11,6 @@ export async function handleGetToolUsageTool(params: GetMcpToolUsageParams) {
   try {
     const { toolName } = params;
     
-    console.error(`Received get_mcp_tool_usage request for tool: ${toolName}`);
-    
     // ツールの使用方法情報を取得
     const toolUsageInfo = getToolUsageInfo(toolName);
     

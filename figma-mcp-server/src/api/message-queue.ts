@@ -14,9 +14,6 @@ export const messageQueues: Record<string, Message[]> = {};
  */
 export function addToMessageQueue(fileId: string, updates: any): boolean {
   try {
-    // 重要なログのみ残す
-    console.error(`Adding message to queue for file ${fileId}`);
-    
     // プラグインが接続されているか確認
     if (!pluginConnections[fileId]) {
       // 接続がない場合でもキューを作成しておく（後でプラグインが接続する可能性がある）
@@ -43,7 +40,6 @@ export function addToMessageQueue(fileId: string, updates: any): boolean {
     };
     
     messageQueues[fileId].push(newMessage);
-    console.error(`Message added to queue. Queue length: ${messageQueues[fileId].length}`);
     
     return true;
   } catch (error) {
@@ -61,10 +57,9 @@ export function getAndClearMessages(fileId: string): Message[] {
   const messages = messageQueues[fileId] || [];
   
   if (messages.length > 0) {
-    console.error(`Found ${messages.length} messages for file ${fileId}`);
     // メッセージを返した後、キューをクリア
     messageQueues[fileId] = [];
   }
   
   return messages;
-} 
+}

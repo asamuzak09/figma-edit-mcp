@@ -11,7 +11,6 @@ import axios from 'axios';
 export async function handleGetFileTool(params: FigmaGetFileParams) {
   try {
     const { fileId, includeComponents = false, includeStyles = false, includeNodes = [], depth } = params;
-    console.error(`Received get_file request for file ${fileId}`);
     
     if (!FIGMA_ACCESS_TOKEN) {
       const errorMessage = "FIGMA_ACCESS_TOKEN is not configured";
@@ -47,10 +46,6 @@ export async function handleGetFileTool(params: FigmaGetFileParams) {
     // Figma APIを呼び出してファイルの内容を取得
     const url = `https://api.figma.com/v1/files/${fileId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     
-    // デバッグ情報を出力
-    console.error(`Requesting Figma API: ${url}`);
-    console.error(`Using token: ${FIGMA_ACCESS_TOKEN ? FIGMA_ACCESS_TOKEN.substring(0, 5) + '...' : 'undefined'}`);
-    
     try {
       const response = await axios.get(url, {
         headers: {
@@ -68,8 +63,7 @@ export async function handleGetFileTool(params: FigmaGetFileParams) {
         }]
       };
     } catch (axiosError: any) {
-      console.error(`Figma API error:`, axiosError.response?.status, axiosError.response?.statusText);
-      console.error(`Error details:`, JSON.stringify(axiosError.response?.data || {}, null, 2));
+      console.error(`Figma API error: ${axiosError.response?.status} ${axiosError.response?.statusText}`);
       
       // エラーレスポンスの詳細情報を取得
       const errorDetails = axiosError.response?.data?.error || axiosError.message || 'Unknown error';

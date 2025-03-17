@@ -18,7 +18,6 @@ pluginRouter.post('/healthcheck', (req, res) => {
     status: 'connected'
   };
   
-  console.error(`Plugin ${pluginId} healthcheck successful for file ${fileId}`);
   res.json({ success: true });
 });
 
@@ -41,10 +40,5 @@ pluginRouter.get('/poll/:fileId/:pluginId', (req, res) => {
   // キューからメッセージを取得して返す
   const messages = getAndClearMessages(fileId);
   
-  if (messages.length > 0) {
-    console.error(`Returning ${messages.length} messages to plugin for file ${fileId}:`, JSON.stringify(messages, null, 2));
-    return res.json({ messages });
-  }
-  
-  return res.json({ messages: [] });
-}); 
+  return res.json({ messages });
+});

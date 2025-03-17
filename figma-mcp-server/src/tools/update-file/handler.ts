@@ -10,15 +10,11 @@ import { addToMessageQueue } from '../../api/message-queue.js';
 export async function handleUpdateFileTool(params: FigmaUpdateParams) {
   try {
     const { fileId, updates } = params;
-    console.error(`Received update_file request for file ${fileId}`);
     
     // メッセージキューに追加
     let success = false;
     
     if (updates && Array.isArray(updates)) {
-      // 更新の処理
-      console.error(`Processing updates with ${updates.length} items`);
-      
       // テキスト要素のcharactersパラメータをチェック
       for (const update of updates) {
         if (update.type === 'createText') {
@@ -60,7 +56,6 @@ export async function handleUpdateFileTool(params: FigmaUpdateParams) {
     }
     
     if (success) {
-      console.error(`Successfully added update to message queue for file ${fileId}`);
       return {
         content: [{
           type: "text",

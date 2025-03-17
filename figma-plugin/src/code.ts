@@ -1,22 +1,17 @@
 // MCPサーバーとの通信設定
 const MCP_SERVER_URL = 'http://localhost:5678';
 const POLLING_INTERVAL = 1000; // 1秒ごとにポーリング
-const DEBUG = true; // デバッグモード
+const DEBUG = false; // デバッグモードを無効化
 
-// デバッグ用関数
-function debug(...args: any[]) {
-  if (DEBUG) {
-    console.log('[FIGMA-PLUGIN]', ...args);
-    try {
-      figma.ui.postMessage({ 
-        type: 'debug', 
-        message: args.map(arg => 
-          typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-        ).join(' ') 
-      });
-    } catch (e) {
-      console.error('Error sending debug message to UI:', e);
-    }
+// ログ出力関数（UIに必要なログのみ）
+function logToUI(message: string, type: 'log' | 'error' = 'log') {
+  try {
+    figma.ui.postMessage({
+      type: type === 'error' ? 'error' : 'log',
+      message: message
+    });
+  } catch (e) {
+    console.error('Error sending message to UI:', e);
   }
 }
 
@@ -31,12 +26,13 @@ Promise.all([
   figma.loadFontAsync({ family: "Inter", style: "Regular" }),
   figma.loadFontAsync({ family: "Inter", style: "Bold" })
 ]).then(() => {
-  debug('Fonts preloaded successfully');
+  logToUI('フォントの読み込みが完了しました');
   fontsLoaded = true;
   // フォントの読み込みが完了したら、サーバーに接続
   healthcheckWithServer();
 }).catch(error => {
-  debug('Error preloading fonts:', error);
+  console.error('Error preloading fonts:', error);
+  logToUI('フォントの読み込みに失敗しましたが、接続を試みます', 'error');
   // エラーが発生しても接続は試みる
   healthcheckWithServer();
 });
@@ -65,7 +61,7 @@ function startPolling() {
 // MCPサーバーにプラグインを登録
 async function healthcheckWithServer() {
   try {
-    debug('Connecting to MCP server...');
+    logToUI('MCPサーバーに接続しています...');
     const response = await fetch(`${MCP_SERVER_URL}/plugin/healthcheck`, {
       method: 'POST',
       headers: {
@@ -82,17 +78,15 @@ async function healthcheckWithServer() {
     }
 
     const data = await response.json();
-    debug('Connection successful:', data);
-    figma.ui.postMessage({ type: 'log', message: `Connected to MCP server with file ID: ${fileId}` });
+    logToUI(`MCPサーバーに接続しました (ファイルID: ${fileId})`);
     figma.ui.postMessage({ type: 'connection-success', fileId });
     
     // 接続成功後、ポーリングを開始
     startPolling();
   } catch (error: unknown) {
     console.error('Failed to connect to MCP server:', error);
-    debug('Connection error:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    figma.ui.postMessage({ type: 'error', message: `Failed to connect to MCP server: ${errorMessage}` });
+    logToUI(`MCPサーバーへの接続に失敗しました: ${errorMessage}`, 'error');
     figma.ui.postMessage({ type: 'connection-error', error: errorMessage });
   }
 }
@@ -102,44 +96,36 @@ async function pollForMessages() {
   try {
     const response = await fetch(`${MCP_SERVER_URL}/plugin/poll/${fileId}/${pluginId}`);
     if (!response.ok) {
-      debug(`Error polling for messages: ${response.status} ${response.statusText}`);
+      console.error(`Error polling for messages: ${response.status} ${response.statusText}`);
       return;
     }
     
     const data = await response.json();
     if (data && data.messages && data.messages.length > 0) {
-      debug('Messages received:', data.messages);
-      
       // 各メッセージを処理
       for (const message of data.messages) {
         if (message.type === 'update') {
-          // 更新メッセージを処理
-          debug('Processing update message:', message);
-          
           try {
             // 更新を適用
             await applyUpdates(message.updates);
-            debug('Updates applied successfully');
           } catch (error) {
-            debug('Error applying updates:', error);
+            console.error('Error applying updates:', error);
+            logToUI('更新の適用中にエラーが発生しました', 'error');
           }
         }
       }
     }
   } catch (error) {
-    debug('Error polling for messages:', error);
+    console.error('Error polling for messages:', error);
   }
 }
 
 // Figmaデザインに更新を適用
 async function applyUpdates(updates: any) {
-  debug('Applying updates:', updates);
   try {
     // 更新の処理
     if (updates && updates.updates && Array.isArray(updates.updates)) {
       // MCPサーバーから送られてくる形式（updates.updatesの形式）
-      debug('Processing updates.updates array:', updates.updates.length);
-      
       // 各更新を処理
       for (const update of updates.updates) {
         const { type, data } = update;
@@ -151,8 +137,6 @@ async function applyUpdates(updates: any) {
       }
     } else if (Array.isArray(updates)) {
       // 配列形式の場合（互換性のため）
-      debug('Processing updates array:', updates.length);
-      
       // 各更新を処理
       for (const update of updates) {
         const { type, data } = update;
@@ -167,14 +151,12 @@ async function applyUpdates(updates: any) {
       await processUpdates(updates);
     }
     
-    debug('Updates applied successfully');
-    figma.ui.postMessage({ type: 'log', message: 'デザインを更新しました' });
+    logToUI('デザインを更新しました');
     figma.notify('デザインを更新しました');
   } catch (error: unknown) {
     console.error('Failed to apply updates:', error);
-    debug('Update application error:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    figma.ui.postMessage({ type: 'error', message: `Failed to apply updates: ${errorMessage}` });
+    logToUI(`更新の適用に失敗しました: ${errorMessage}`, 'error');
     figma.notify('デザイン更新中にエラーが発生しました', { error: true });
   }
 }
@@ -200,7 +182,7 @@ async function processUpdates(updates: any) {
       try {
         frame.fills = fills as Paint[];
       } catch (e) {
-        debug('Error setting fills:', e);
+        console.error('Error setting fills:', e);
       }
     }
     
@@ -227,7 +209,7 @@ async function processUpdates(updates: any) {
       try {
         frame.strokes = strokes as Paint[];
       } catch (e) {
-        debug('Error setting strokes:', e);
+        console.error('Error setting strokes:', e);
       }
     }
     
@@ -242,7 +224,7 @@ async function processUpdates(updates: any) {
       try {
         frame.effects = effects as Effect[];
       } catch (e) {
-        debug('Error setting effects:', e);
+        console.error('Error setting effects:', e);
       }
     }
     
@@ -251,7 +233,6 @@ async function processUpdates(updates: any) {
     
     // 現在のページに追加
     figma.currentPage.appendChild(frame);
-    debug('Frame created:', { name: frame.name, id: frame.id });
     
     // ビューポートを新しいフレームに移動
     figma.viewport.scrollAndZoomIntoView([frame]);
@@ -261,7 +242,6 @@ async function processUpdates(updates: any) {
   if (updates.createText) {
     if (Array.isArray(updates.createText)) {
       // 配列の場合は各要素を処理
-      debug('Processing array of text elements:', updates.createText.length);
       await Promise.all(updates.createText.map((textData: any, index: number) => createTextElement(textData, index)));
     } else {
       // 単一のオブジェクトの場合
@@ -273,7 +253,6 @@ async function processUpdates(updates: any) {
   if (updates.createRectangle) {
     if (Array.isArray(updates.createRectangle)) {
       // 配列の場合は各要素を処理
-      debug('Processing array of rectangles:', updates.createRectangle.length);
       await Promise.all(updates.createRectangle.map((rectData: any, index: number) => 
         createRectangleElement(rectData, index)
       ));
@@ -287,7 +266,6 @@ async function processUpdates(updates: any) {
   if (updates.createEllipse) {
     if (Array.isArray(updates.createEllipse)) {
       // 配列の場合は各要素を処理
-      debug('Processing array of ellipses:', updates.createEllipse.length);
       await Promise.all(updates.createEllipse.map((ellipseData: any, index: number) => 
         createEllipseElement(ellipseData, index)
       ));
@@ -301,7 +279,6 @@ async function processUpdates(updates: any) {
   if (updates.createLine) {
     if (Array.isArray(updates.createLine)) {
       // 配列の場合は各要素を処理
-      debug('Processing array of lines:', updates.createLine.length);
       updates.createLine.forEach((lineData: any, index: number) => {
         createLineElement(lineData, index);
       });
@@ -315,7 +292,6 @@ async function processUpdates(updates: any) {
   if (updates.createImage) {
     if (Array.isArray(updates.createImage)) {
       // 配列の場合は各要素を処理
-      debug('Processing array of images:', updates.createImage.length);
       updates.createImage.forEach((imageData: any, index: number) => {
         createImageElement(imageData, index);
       });
@@ -329,7 +305,6 @@ async function processUpdates(updates: any) {
   if (updates.createComponent) {
     if (Array.isArray(updates.createComponent)) {
       // 配列の場合は各要素を処理
-      debug('Processing array of components:', updates.createComponent.length);
       updates.createComponent.forEach((componentData: any, index: number) => {
         createComponentElement(componentData, index);
       });
@@ -359,7 +334,7 @@ function createTextElement(textData: {
       // charactersパラメータがない場合はエラーを返す
       if (!textData.characters) {
         const error = new Error("Property 'characters' is required for text elements");
-        debug('Error creating text element:', error);
+        logToUI('テキスト要素の作成に失敗しました: charactersパラメータが必要です', 'error');
         figma.notify('テキスト要素の作成に失敗しました: charactersパラメータが必要です', { error: true });
         reject(error);
         return;
@@ -377,7 +352,6 @@ const fontStyle = fontWeight === 'Bold' ? 'Bold' : 'Regular';
 
 try {
   // 常にフォントを読み込む（キャッシュされていれば高速に完了する）
-  debug('Loading font:', { family: "Inter", style: fontStyle });
   await figma.loadFontAsync({ family: "Inter", style: fontStyle });
   
   // フォントが読み込まれた後にテキストを設定
@@ -417,20 +391,19 @@ try {
             const solidFills = fills as SolidPaint[];
             text.fills = solidFills;
           } catch (e) {
-            debug('Error setting text fills:', e);
+            console.error('Error setting text fills:', e);
           }
         }
         
         // 現在のページに追加
         figma.currentPage.appendChild(text);
-        debug('Text created:', { name: text.name, id: text.id, characters: text.characters });
         resolve();
       } catch (e) {
-        debug('Error loading font:', e);
+        console.error('Error loading font:', e);
         reject(e);
       }
     } catch (error) {
-      debug('Error creating text element:', error);
+      console.error('Error creating text element:', error);
       reject(error);
     }
   });
@@ -477,7 +450,7 @@ function createRectangleElement(rectData: {
         try {
           rect.fills = fills as Paint[];
         } catch (e) {
-          debug('Error setting fills:', e);
+          console.error('Error setting fills:', e);
         }
       }
       
@@ -486,7 +459,7 @@ function createRectangleElement(rectData: {
         try {
           rect.strokes = strokes as Paint[];
         } catch (e) {
-          debug('Error setting strokes:', e);
+          console.error('Error setting strokes:', e);
         }
       }
       
@@ -512,7 +485,7 @@ function createRectangleElement(rectData: {
         try {
           rect.effects = effects as Effect[];
         } catch (e) {
-          debug('Error setting effects:', e);
+          console.error('Error setting effects:', e);
         }
       }
       
@@ -521,11 +494,10 @@ function createRectangleElement(rectData: {
       
       // 現在のページに追加
       figma.currentPage.appendChild(rect);
-      debug('Rectangle created:', { name: rect.name, id: rect.id });
       
       resolve(rect);
     } catch (error) {
-      debug('Error creating rectangle:', error);
+      console.error('Error creating rectangle:', error);
       reject(error);
     }
   });
@@ -567,7 +539,7 @@ function createEllipseElement(ellipseData: {
         try {
           ellipse.fills = fills as Paint[];
         } catch (e) {
-          debug('Error setting fills:', e);
+          console.error('Error setting fills:', e);
         }
       }
       
@@ -576,7 +548,7 @@ function createEllipseElement(ellipseData: {
         try {
           ellipse.strokes = strokes as Paint[];
         } catch (e) {
-          debug('Error setting strokes:', e);
+          console.error('Error setting strokes:', e);
         }
       }
       
@@ -596,7 +568,7 @@ function createEllipseElement(ellipseData: {
         try {
           ellipse.effects = effects as Effect[];
         } catch (e) {
-          debug('Error setting effects:', e);
+          console.error('Error setting effects:', e);
         }
       }
       
@@ -605,11 +577,10 @@ function createEllipseElement(ellipseData: {
       
       // 現在のページに追加
       figma.currentPage.appendChild(ellipse);
-      debug('Ellipse created:', { name: ellipse.name, id: ellipse.id });
       
       resolve(ellipse);
     } catch (error) {
-      debug('Error creating ellipse:', error);
+      console.error('Error creating ellipse:', error);
       reject(error);
     }
   });
@@ -632,7 +603,7 @@ function createLineElement(lineData: {
   } = lineData;
   
   if (!points || points.length < 2) {
-    debug('Error: Line requires at least 2 points');
+    console.error('Error: Line requires at least 2 points');
     return null;
   }
   
@@ -657,7 +628,7 @@ function createLineElement(lineData: {
     try {
       line.strokes = strokes as Paint[];
     } catch (e) {
-      debug('Error setting strokes:', e);
+      console.error('Error setting strokes:', e);
     }
   } else {
     // デフォルトのストローク
@@ -675,7 +646,7 @@ function createLineElement(lineData: {
     try {
       line.effects = effects as Effect[];
     } catch (e) {
-      debug('Error setting effects:', e);
+      console.error('Error setting effects:', e);
     }
   }
   
@@ -684,7 +655,6 @@ function createLineElement(lineData: {
   
   // 現在のページに追加
   figma.currentPage.appendChild(line);
-  debug('Line created:', { name: line.name, id: line.id });
   
   return line;
 }
@@ -733,17 +703,15 @@ function createImageElement(imageData: {
         try {
           rect.effects = effects as Effect[];
         } catch (e) {
-          debug('Error setting effects:', e);
+          console.error('Error setting effects:', e);
         }
       }
       
       // 表示/非表示の設定
       if (visible !== undefined) rect.visible = visible;
-      
-      debug('Image created:', { name: rect.name, id: rect.id });
     })
     .catch(error => {
-      debug('Error creating image:', error);
+      console.error('Error creating image:', error);
       // エラー時は赤い矩形を表示
       rect.fills = [{ type: 'SOLID', color: { r: 1, g: 0, b: 0 } }];
     });
@@ -790,7 +758,7 @@ function createComponentElement(componentData: {
     try {
       component.fills = fills as Paint[];
     } catch (e) {
-      debug('Error setting fills:', e);
+      console.error('Error setting fills:', e);
     }
   }
   
@@ -799,7 +767,7 @@ function createComponentElement(componentData: {
     try {
       component.strokes = strokes as Paint[];
     } catch (e) {
-      debug('Error setting strokes:', e);
+      console.error('Error setting strokes:', e);
     }
   }
   
@@ -817,7 +785,7 @@ function createComponentElement(componentData: {
     try {
       component.effects = effects as Effect[];
     } catch (e) {
-      debug('Error setting effects:', e);
+      console.error('Error setting effects:', e);
     }
   }
   
@@ -826,7 +794,6 @@ function createComponentElement(componentData: {
   
   // 現在のページに追加
   figma.currentPage.appendChild(component);
-  debug('Component created:', { name: component.name, id: component.id });
   
   return component;
 }
@@ -845,4 +812,4 @@ figma.ui.onmessage = (msg) => {
 };
 
 // 初期化時の接続はフォントの読み込み完了後に行うため、ここでは実行しない
-// healthcheckWithServer(); 
+// healthcheckWithServer();
