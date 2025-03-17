@@ -17,30 +17,11 @@ cd figma-edit-mcp
 2. **依存関係のインストール**
 
 ```bash
-# figma-mcp-serverディレクトリに移動
-cd figma-mcp-server
 
-# 依存関係のインストール
-npm install
-
-# ビルド
-npm run build
-
-# 親ディレクトリに戻る
-cd ..
-
-# figma-pluginディレクトリに移動
-cd figma-plugin
-
-# 依存関係のインストール
-npm install
-
-# ビルド
-npm run build
-
-# 親ディレクトリに戻る
-cd ..
+npm run install-all
 ```
+
+このコマンドは、figma-mcp-serverとfigma-pluginの両方のディレクトリで依存関係をインストールし、ビルドを実行します。
 
 3. **Figma プラグインのインストール**
 

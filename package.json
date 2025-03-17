@@ -1,0 +1,10 @@
+{
+  "name": "figma-edit-mcp",
+  "version": "1.0.0",
+  "description": "Figma Edit MCP",
+  "scripts": {
+    "install-all": "cd figma-mcp-server && npm install && npm run build && cd ../figma-plugin && npm install && npm run build"
+  },
+  "author": "",
+  "license": "ISC"
+}
