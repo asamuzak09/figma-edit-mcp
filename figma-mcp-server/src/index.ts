@@ -16,9 +16,15 @@ if (!FIGMA_ACCESS_TOKEN) {
 const app = express();
 const server = http.createServer(app);
 
-// CORSを有効化
+// CORSを有効化（プライベートネットワークアクセスを許可）
 app.use(cors());
 app.use(express.json());
+
+// プライベートネットワークアクセスを許可するためのヘッダーを追加
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Private-Network', 'true');
+  next();
+});
 
 // プラグインAPIルーターを設定
 app.use('/plugin', pluginRouter);
