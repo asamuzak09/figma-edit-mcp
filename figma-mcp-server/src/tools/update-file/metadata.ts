@@ -99,9 +99,13 @@ export const updateFileMetadata: ToolUsageInfo = {
         ],
         "x": 100,
         "y": 100,
+        "width": 300,
+        "textAutoResize": "HEIGHT",
         "textAlignHorizontal": "CENTER",
         "textCase": "UPPER",
-        "letterSpacing": 1.5
+        "letterSpacing": 1.5,
+        "paragraphSpacing": 10,
+        "lineHeight": { "value": 150, "unit": "PERCENT" }
       }
     }
   ]
@@ -422,11 +426,15 @@ export const updateFileMetadata: ToolUsageInfo = {
       "type": "createText",
       "data": {
         "name": "説明",
-        "characters": "これは製品の詳細説明です。複数行にわたるテキストを表示できます。",
+        "characters": "これは製品の詳細説明です。複数行にわたるテキストを表示できます。長いテキストの場合は、幅を指定して自動リサイズモードを設定することで、テキストが適切に折り返されます。",
         "fontSize": 16,
         "fills": [{ "type": "SOLID", "color": { "r": 0.3, "g": 0.3, "b": 0.3 } }],
         "x": 120,
-        "y": 270
+        "y": 270,
+        "width": 260,
+        "textAutoResize": "HEIGHT",
+        "lineHeight": { "value": 150, "unit": "PERCENT" },
+        "paragraphSpacing": 10
       }
     },
     {
@@ -461,6 +469,9 @@ export const updateFileMetadata: ToolUsageInfo = {
   ],
   notes: [
     "テキスト要素を作成する場合は、必ず `characters` パラメータを指定してください。",
+    "テキストボックスのサイズを適切に設定するには、`width` パラメータと `textAutoResize` パラメータを使用してください。長いテキストの場合は、`width` を指定して `textAutoResize` を 'HEIGHT' に設定することで、テキストが適切に折り返されます。",
+    "テキストの行間隔を調整するには、`lineHeight` パラメータを使用してください。`unit` には 'PIXELS'（ピクセル単位）または 'PERCENT'（パーセント単位）を指定できます。",
+    "段落間の間隔を設定するには、`paragraphSpacing` パラメータを使用してください。",
     "色の値は 0 から 1 の範囲で指定します（RGB各チャンネル）。",
     "フィグマファイルIDは、フィグマのURLから取得できます（例: https://www.figma.com/file/XXXXXXXXXXXX/FileName の XXXXXXXXXXXX 部分）。",
     "座標系は左上を原点（0,0）とし、すべての要素（矩形、円形など）の位置は左上隅からの座標で指定します。特に円形要素の場合、中心ではなく左上隅からの座標であることに注意してください。"
