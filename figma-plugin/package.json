@@ -1,7 +1,7 @@
 {
-  "name": "cursor-figma-assistant",
+  "name": "figma-mcp-assistant",
   "version": "1.0.0",
-  "description": "Figma plugin for Cursor integration",
+  "description": "Figma plugin for MCP integration",
   "main": "code.js",
   "scripts": {
     "build": "tsc -p tsconfig.json && node build.js",

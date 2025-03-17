@@ -1,6 +1,6 @@
 {
-  "name": "Cursor Figma Assistant",
-  "id": "cursor-figma-assistant",
+  "name": "Figma MCP Assistant",
+  "id": "figma-mcp-assistant",
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",
