@@ -348,7 +348,7 @@ function createTextElement(textData, index) {
                 reject(error);
                 return;
             }
-            const { name, characters, fontSize, fills, x, y, fontWeight } = textData;
+            const { name, characters, fontSize, fills, x, y, fontWeight, width, textAutoResize, paragraphSpacing, lineHeight } = textData;
             const text = figma.createText();
             text.name = name || `New Text ${index !== undefined ? index + 1 : ''}`;
             // 位置の設定
@@ -368,6 +368,30 @@ function createTextElement(textData, index) {
                     text.fontSize = fontSize;
                 if (fontWeight === 'Bold')
                     text.fontName = { family: "Inter", style: "Bold" };
+                // テキストの自動リサイズモードを設定
+                if (textAutoResize) {
+                    text.textAutoResize = textAutoResize;
+                }
+                else {
+                    // デフォルトでは幅固定で高さ自動調整
+                    text.textAutoResize = 'HEIGHT';
+                }
+                // 幅が指定されている場合は設定
+                if (width) {
+                    text.resize(width, text.height);
+                }
+                else if (characters.length > 20) {
+                    // 長いテキストの場合はデフォルトの幅を設定
+                    text.resize(300, text.height);
+                }
+                // 段落間隔の設定
+                if (paragraphSpacing !== undefined) {
+                    text.paragraphSpacing = paragraphSpacing;
+                }
+                // 行の高さの設定
+                if (lineHeight) {
+                    text.lineHeight = lineHeight;
+                }
                 // 塗りつぶしの設定
                 if (fills && Array.isArray(fills)) {
                     try {
