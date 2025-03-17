@@ -174,6 +174,15 @@ export interface CreateComponentProps extends BaseNodeProps {
   description?: string;
 }
 
+// Figmaファイル取得パラメータの型
+export interface FigmaGetFileParams {
+  fileId: string;
+  includeComponents?: boolean;
+  includeStyles?: boolean;
+  includeNodes?: string[];
+  depth?: number;
+}
+
 // ツール使用方法取得パラメータの型
 export interface GetMcpToolUsageParams {
   toolName: string;

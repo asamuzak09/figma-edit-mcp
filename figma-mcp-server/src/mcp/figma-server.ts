@@ -11,6 +11,8 @@ import {
   SERVER_VERSION,
   UPDATE_FILE_TOOL_NAME,
   UPDATE_FILE_TOOL_DESCRIPTION,
+  GET_FILE_TOOL_NAME,
+  GET_FILE_TOOL_DESCRIPTION,
   USAGE_TOOL_NAME,
   USAGE_TOOL_DESCRIPTION
 } from '../config/index.js';
@@ -71,6 +73,12 @@ export class FigmaServer {
             name: UPDATE_FILE_TOOL_NAME,
             description: UPDATE_FILE_TOOL_DESCRIPTION,
             inputSchema: toolUsageRegistry["update_file"].inputSchema
+          },
+          // get_file ツール
+          {
+            name: GET_FILE_TOOL_NAME,
+            description: GET_FILE_TOOL_DESCRIPTION,
+            inputSchema: toolUsageRegistry["get_file"].inputSchema
           },
           // get_mcp_tool_usage ツール
           {

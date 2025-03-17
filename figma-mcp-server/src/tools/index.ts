@@ -1,6 +1,7 @@
 import { handleUpdateFileTool } from './update-file/index.js';
 import { handleGetToolUsageTool } from './get-tool-usage/index.js';
-import { UPDATE_FILE_TOOL_NAME, USAGE_TOOL_NAME } from '../config/index.js';
+import { handleGetFileTool } from './get-file/index.js';
+import { UPDATE_FILE_TOOL_NAME, USAGE_TOOL_NAME, GET_FILE_TOOL_NAME } from '../config/index.js';
 
 // ツールハンドラーの型定義
 type ToolHandler = (params: any) => Promise<{
@@ -13,7 +14,8 @@ type ToolHandler = (params: any) => Promise<{
  */
 export const toolHandlers: Record<string, ToolHandler> = {
   [UPDATE_FILE_TOOL_NAME]: handleUpdateFileTool,
-  [USAGE_TOOL_NAME]: handleGetToolUsageTool
+  [USAGE_TOOL_NAME]: handleGetToolUsageTool,
+  [GET_FILE_TOOL_NAME]: handleGetFileTool
 };
 
 /**
