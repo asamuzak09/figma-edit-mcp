@@ -1,355 +1,211 @@
-# Figma MCP Integration
+# Figma MCP Plugin
 
-Cursor と Figma を連携させるための MCP サーバーと Figma プラグインのセット。LLM を使用して Figma デザインを自動生成・編集できます。
+Figma MCP（Model Context Protocol）プラグインは、Figmaファイルをプログラムで操作するためのツールです。このプラグインを使用することで、テキスト、図形、フレームなどの要素をFigmaファイルに追加したり、既存の要素を編集したりすることができます。
 
-## プロジェクト構成
+## 特徴
 
-- `figma-plugin/`: Figma プラグイン
-- `figma-mcp-server/`: MCP サーバー
+- **MCPサーバー連携**: Model Context Protocolを使用して、Figmaプラグインと通信
+- **複数の要素タイプ**: フレーム、テキスト、矩形、楕円、線、画像、コンポーネントなどの作成をサポート
+- **テキスト書式設定**: 高度なテキスト書式設定（フォントサイズ、行間、段落間隔など）をサポート
+- **一括更新**: 複数の要素を一度のリクエストで作成可能
 
-## セットアップ
+## インストレーション
 
 ### 前提条件
 
-- Node.js 18 以上
-- Figma デスクトップアプリ
-- Cursor
+- Node.js (v14以上)
+- npm (v6以上)
+- Figmaアカウント
+- Figma Personal Access Token
 
-### MCP サーバーのセットアップ
+### セットアップ手順
+
+1. **リポジトリのクローン**
 
 ```bash
+git clone https://github.com/asamuzak09/figma-edit-mcp.git
+cd figma-edit-mcp
+```
+
+2. **MCPサーバーのセットアップ**
+
+```bash
+# figma-mcp-serverディレクトリに移動
 cd figma-mcp-server
+
+# 依存関係のインストール
 npm install
+
+# 環境変数の設定
+# .envファイルを作成し、Figma Personal Access Tokenを設定
+echo "FIGMA_ACCESS_TOKEN=your_figma_personal_access_token" > .env
+
+# ビルド
 npm run build
+
+# サーバーの起動
+node build/index.js
 ```
 
-### Figma プラグインのセットアップ
+Figma Personal Access Tokenの取得方法:
+1. Figmaにログイン
+2. 右上のプロフィールアイコンをクリック
+3. 「Settings」を選択
+4. 「Account」タブで「Personal access tokens」セクションに移動
+5. 「Create a new personal access token」をクリック
+6. トークン名を入力し、「Create token」をクリック
+7. 表示されたトークンをコピー（このトークンは一度しか表示されないので注意）
+
+3. **Figmaプラグインのセットアップ**
 
 ```bash
-cd figma-plugin
+# figma-pluginディレクトリに移動
+cd ../figma-plugin
+
+# 依存関係のインストール
 npm install
+
+# ビルド
 npm run build
 ```
 
-Figma デスクトップアプリで、「Plugins」→「Development」→「Import plugin from manifest...」を選択し、`figma-plugin/manifest.json`ファイルを選択します。
+4. **Figmaプラグインのインストール**
+
+Figmaプラグインをローカルで開発モードでインストールするには：
+
+1. Figmaを開く
+2. 右上のメニューから「Plugins」→「Development」→「Import plugin from manifest...」を選択
+3. figma-plugin/manifest.jsonファイルを選択
+4. プラグインが開発モードでインストールされます
+
+5. **Cline MCPの設定**
+
+Clineでこのプラグインを使用するには、MCPサーバーの設定を追加する必要があります：
+
+1. Clineの設定ファイルを開く:
+   - macOS: `~/Library/Application Support/Cursor/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json`
+   - Windows: `%APPDATA%\Cursor\User\globalStorage\rooveterinaryinc.roo-cline\settings\cline_mcp_settings.json`
+
+2. 以下の設定を`mcpServers`オブジェクトに追加:
+
+```json
+"figma-mcp-server": {
+  "command": "node",
+  "args": ["/path/to/figma-edit-mcp/figma-mcp-server/build/index.js"],
+  "env": {
+    "FIGMA_ACCESS_TOKEN": "your_figma_personal_access_token"
+  }
+}
+```
+
+`/path/to/figma-edit-mcp`は、実際のリポジトリのパスに置き換えてください。
 
 ## 使用方法
 
-### MCP サーバーの起動
+### MCPサーバーの起動
 
 ```bash
 cd figma-mcp-server
-FIGMA_ACCESS_TOKEN=your_figma_access_token node build/index.js
+node build/index.js
 ```
 
-### Figma プラグインの実行
+### Figmaプラグインの使用
 
-1. Figma でファイルを開く
-2. メニューから「Plugins」→「Development」→「Cursor Figma Assistant」を選択
-3. プラグイン UI で「Connect to MCP Server」ボタンをクリック
+1. Figmaを開く
+2. 右上のメニューから「Plugins」→「Development」→「Figma MCP Plugin」を選択
+3. プラグインが起動し、MCPサーバーに接続されます
 
-### Cursor からデザイン更新
+### Clineからの使用
 
-Cursor のチャットで MCP ツールを使用して Figma デザインを更新できます。以下はリクエストパラメータの例です：
+Clineから以下のようにMCPツールを使用できます：
 
-```json
+```
+<use_mcp_tool>
+<server_name>figma-mcp-server</server_name>
+<tool_name>update_file</tool_name>
+<arguments>
 {
-  "fileId": "your_figma_file_id",
+  "fileId": "YOUR_FIGMA_FILE_ID",
   "updates": [
-    {
-      "type": "createFrame",
-      "data": {
-        "name": "新しいフレーム",
-        "width": 400,
-        "height": 300,
-        "fills": [
-          { "type": "SOLID", "color": { "r": 0.9, "g": 0.9, "b": 0.9 } }
-        ]
-      }
-    },
     {
       "type": "createText",
       "data": {
-        "name": "テキスト要素",
-        "content": "こんにちは、世界！",
+        "name": "テキスト名",
+        "characters": "テキスト内容",
         "fontSize": 24,
+        "fontWeight": "Bold",
         "fills": [
-          { "type": "SOLID", "color": { "r": 0.1, "g": 0.1, "b": 0.1 } }
+          {
+            "type": "SOLID",
+            "color": { "r": 0.1, "g": 0.1, "b": 0.1 }
+          }
         ],
-        "x": 20,
-        "y": 50
-      }
-    },
-    {
-      "type": "createRectangle",
-      "data": {
-        "name": "矩形",
-        "width": 200,
-        "height": 100,
-        "fills": [{ "type": "SOLID", "color": { "r": 0.2, "g": 0.6, "b": 1 } }],
-        "x": 20,
+        "x": 100,
         "y": 100,
-        "cornerRadius": 8
+        "width": 300,
+        "textAutoResize": "HEIGHT",
+        "lineHeight": { "value": 150, "unit": "PERCENT" }
       }
     }
   ]
 }
+</arguments>
+</use_mcp_tool>
 ```
 
-## 技術詳細
+`YOUR_FIGMA_FILE_ID`は、操作したいFigmaファイルのIDに置き換えてください。FigmaファイルIDは、FigmaのURLから取得できます（例: https://www.figma.com/file/XXXXXXXXXXXX/FileName のXXXXXXXXXXXX部分）。
 
-### 通信フロー
+## 主な機能
 
-1. **MCP サーバー**：
+### 要素タイプ
 
-   - Cursor からの `figma_update` ツールリクエストを受け取る
-   - メッセージキューにデザイン更新情報を追加
+- **createFrame**: 背景やコンテナとして使用するフレームを作成
+- **createText**: テキスト要素を作成（タイトル、説明文など）
+- **createRectangle**: 矩形を作成（ボタン、カードなど）
+- **createEllipse**: 楕円を作成（アイコン、装飾など）
+- **createLine**: 線を作成（区切り線、矢印など）
+- **createImage**: 画像を挿入（ロゴ、キャラクターなど）
+- **createComponent**: 再利用可能なコンポーネントを作成
 
-2. **Figma プラグイン**：
-   - 起動時に MCP サーバーに接続
-   - 定期的にポーリングしてメッセージを取得
-   - 取得したメッセージに基づいて Figma デザインを更新
+### テキスト要素の設定
 
-### サポートされる更新タイプ
-
-### フレームの作成
+テキストボックスのサイズを適切に設定するには、以下のパラメータを使用します：
 
 ```json
 {
-  "createFrame": {
-    "name": "フレーム名",
-    "width": 400,
-    "height": 300,
-    "fills": [
-      {
-        "type": "SOLID",
-        "color": { "r": 0.9, "g": 0.9, "b": 0.9 }
-      }
-    ],
-    "cornerRadius": 8,
-    "x": 100,
-    "y": 100,
-    "layoutMode": "VERTICAL",
-    "primaryAxisSizingMode": "AUTO",
-    "counterAxisSizingMode": "AUTO",
-    "itemSpacing": 10,
-    "paddingLeft": 16,
-    "paddingRight": 16,
-    "paddingTop": 16,
-    "paddingBottom": 16
-  }
+  "width": 300,                      // テキストボックスの幅
+  "textAutoResize": "HEIGHT",        // 高さのみ自動調整
+  "lineHeight": {                    // 行の高さ
+    "value": 150,
+    "unit": "PERCENT"
+  },
+  "paragraphSpacing": 10             // 段落間の間隔
 }
 ```
 
-### テキストの作成
+## 注意事項
 
-単一のテキスト要素:
-
-```json
-{
-  "createText": {
-    "name": "テキスト名",
-    "content": "テキスト内容",
-    "fontSize": 24,
-    "fontWeight": "Bold",
-    "fills": [
-      {
-        "type": "SOLID",
-        "color": { "r": 0.1, "g": 0.1, "b": 0.1 }
-      }
-    ],
-    "x": 100,
-    "y": 100,
-    "textAlignHorizontal": "CENTER",
-    "textCase": "UPPER",
-    "letterSpacing": 1.5
-  }
-}
-```
-
-複数のテキスト要素:
-
-```json
-{
-  "createText": [
-    {
-      "name": "タイトル",
-      "content": "見出し",
-      "fontSize": 24,
-      "fontWeight": "Bold"
-    },
-    {
-      "name": "サブタイトル",
-      "content": "サブ見出し",
-      "fontSize": 18
-    }
-  ]
-}
-```
-
-### 矩形の作成
-
-単一の矩形:
-
-```json
-{
-  "createRectangle": {
-    "name": "矩形名",
-    "width": 200,
-    "height": 100,
-    "fills": [
-      {
-        "type": "SOLID",
-        "color": { "r": 0.2, "g": 0.6, "b": 1.0 }
-      }
-    ],
-    "cornerRadius": 8,
-    "x": 100,
-    "y": 100,
-    "strokes": [
-      {
-        "type": "SOLID",
-        "color": { "r": 0, "g": 0, "b": 0 }
-      }
-    ],
-    "strokeWeight": 2
-  }
-}
-```
-
-複数の矩形:
-
-```json
-{
-  "createRectangle": [
-    {
-      "name": "青い矩形",
-      "width": 200,
-      "height": 100,
-      "fills": [{ "type": "SOLID", "color": { "r": 0.2, "g": 0.6, "b": 1.0 } }],
-      "x": 100,
-      "y": 100
-    },
-    {
-      "name": "赤い矩形",
-      "width": 200,
-      "height": 100,
-      "fills": [{ "type": "SOLID", "color": { "r": 1.0, "g": 0.2, "b": 0.2 } }],
-      "x": 100,
-      "y": 220
-    }
-  ]
-}
-```
-
-### 楕円の作成
-
-単一の楕円:
-
-```json
-{
-  "createEllipse": {
-    "name": "楕円名",
-    "width": 200,
-    "height": 100,
-    "fills": [
-      {
-        "type": "SOLID",
-        "color": { "r": 1.0, "g": 0.5, "b": 0.0 }
-      }
-    ],
-    "x": 100,
-    "y": 100,
-    "strokes": [
-      {
-        "type": "SOLID",
-        "color": { "r": 0, "g": 0, "b": 0 }
-      }
-    ],
-    "strokeWeight": 2
-  }
-}
-```
-
-### 線の作成
-
-単一の線:
-
-```json
-{
-  "createLine": {
-    "name": "線名",
-    "points": [
-      { "x": 0, "y": 0 },
-      { "x": 100, "y": 100 }
-    ],
-    "strokes": [
-      {
-        "type": "SOLID",
-        "color": { "r": 0, "g": 0, "b": 0 }
-      }
-    ],
-    "strokeWeight": 2,
-    "strokeCap": "ARROW_EQUILATERAL"
-  }
-}
-```
-
-### 画像の挿入
-
-単一の画像:
-
-```json
-{
-  "createImage": {
-    "name": "画像名",
-    "imageUrl": "https://example.com/image.jpg",
-    "width": 300,
-    "height": 200,
-    "x": 100,
-    "y": 100,
-    "scaleMode": "FILL"
-  }
-}
-```
-
-### コンポーネントの作成
-
-単一のコンポーネント:
-
-```json
-{
-  "createComponent": {
-    "name": "コンポーネント名",
-    "description": "コンポーネントの説明",
-    "width": 300,
-    "height": 200,
-    "fills": [
-      {
-        "type": "SOLID",
-        "color": { "r": 0.9, "g": 0.9, "b": 0.9 }
-      }
-    ],
-    "cornerRadius": 8,
-    "x": 100,
-    "y": 100
-  }
-}
-```
+- 色の値は0から1の範囲で指定（RGB各チャンネル）
+- 座標系は左上を原点（0,0）とし、すべての要素の位置は左上隅からの座標で指定
+- テキスト要素を作成する場合は、必ず `characters` パラメータを指定
+- 長いテキストの場合は、`width` を指定して `textAutoResize` を 'HEIGHT' に設定することで、テキストが適切に折り返される
 
 ## トラブルシューティング
 
-- **プラグインが接続できない場合**：
+### MCPサーバーに接続できない場合
 
-  - MCP サーバーが起動しているか確認
-  - ポート 3000 が他のアプリケーションで使用されていないか確認
-  - ブラウザの CORS ポリシーが原因の場合は、Figma デスクトップアプリを使用
+1. MCPサーバーが起動しているか確認
+2. Figma Personal Access Tokenが正しく設定されているか確認
+3. ポート5678が他のアプリケーションで使用されていないか確認
 
-- **デザイン更新が反映されない場合**：
-  - プラグインのログでエラーメッセージを確認
-  - MCP サーバーのログでメッセージキューの状態を確認
-  - プラグインを再起動して再接続
+### プラグインがFigmaに表示されない場合
 
-## ライセンス
+1. プラグインが正しくインストールされているか確認
+2. manifest.jsonファイルが正しく設定されているか確認
+3. Figmaを再起動
 
-MIT
+### テキストが途中で切れる場合
+
+1. `width` パラメータを指定
+2. `textAutoResize` パラメータを 'HEIGHT' に設定
+3. 必要に応じて `lineHeight` と `paragraphSpacing` パラメータを調整
