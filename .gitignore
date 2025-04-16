@@ -7,3 +7,4 @@ figma-plugin/src/code.js
 figma-plugin/ui.html
 figma-plugin/src/ui.js
 figma-mcp-server/build/
+figma-mcp-server/.figma-mcp-server.pid

@@ -23,6 +23,7 @@ import { getToolHandler, toolUsageRegistry } from '../tools/index.js';
  */
 export class FigmaServer {
   private server: Server;
+  private isRunning: boolean = false;
 
   constructor() {
     this.server = new Server({
@@ -46,10 +47,7 @@ export class FigmaServer {
       console.error("[MCP Error]", error);
     };
 
-    process.on('SIGINT', async () => {
-      await this.server.close();
-      process.exit(0);
-    });
+    // 個別のSIGINTハンドラはここでは設定せず、index.tsで一元管理
   }
 
   /**
@@ -115,6 +113,26 @@ export class FigmaServer {
   async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
+    this.isRunning = true;
     console.error("Figma MCP server running on stdio");
+  }
+
+  /**
+   * サーバーのシャットダウン
+   * 外部からサーバーを適切に終了するためのパブリックメソッド
+   */
+  async shutdown(): Promise<void> {
+    if (this.isRunning) {
+      await this.server.close();
+      this.isRunning = false;
+      console.error("Figma MCP server shut down");
+    }
+  }
+
+  /**
+   * サーバーの実行状態を取得
+   */
+  isServerRunning(): boolean {
+    return this.isRunning;
   }
 }

@@ -7,5 +7,5 @@
   "capabilities": ["textreview"],
   "enablePrivatePluginApi": true,
   "enableProposedApi": false,
-  "editorType": ["figma"]
+  "editorType": ["figma", "figjam"]
 } 
